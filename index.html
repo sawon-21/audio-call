@@ -1,66 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Smart Video Call</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HD Video Call</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
   <style>
     :root {
-      --primary-color: #6366f1;
-      --danger-color: #ef4444;
-      --success-color: #10b981;
-      --dark-color: #1e293b;
-      --light-color: #f8fafc;
-      --overlay-color: rgba(0, 0, 0, 0.7);
-      --glass-color: rgba(255, 255, 255, 0.15);
+      --primary: #6366f1;
+      --danger: #ef4444;
+      --success: #10b981;
+      --dark: #1e293b;
+      --light: #f8fafc;
+      --overlay: rgba(0, 0, 0, 0.7);
+      --glass: rgba(255, 255, 255, 0.15);
     }
     
-    * {
-      box-sizing: border-box;
-    }
-    
-    html, body {
+    body {
       margin: 0;
       padding: 0;
-      height: 100%;
+      height: 100vh;
       background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      color: var(--light-color);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      color: var(--light);
       overflow: hidden;
     }
     
-    .video-call-wrapper {
+    .video-container {
       position: relative;
-      width: 100vw;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
+      width: 100%;
+      height: 100%;
     }
     
     #remoteVideo {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      position: absolute;
-      top: 0;
-      left: 0;
-      z-index: 1;
-      background-color: #000;
+      background: #000;
     }
     
     #localVideo {
       position: absolute;
-      top: 1rem;
-      right: 1rem;
+      top: 20px;
+      right: 20px;
       width: 120px;
       height: 170px;
-      border-radius: 0.75rem;
-      z-index: 2;
+      border-radius: 12px;
+      border: 2px solid var(--light);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
       object-fit: cover;
-      border: 2px solid var(--light-color);
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+      z-index: 2;
       transition: all 0.3s ease;
     }
     
@@ -73,119 +63,48 @@
       top: 0;
       left: 0;
       width: 100%;
-      padding: 1rem;
+      padding: 15px;
+      z-index: 3;
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      z-index: 3;
-      background: linear-gradient(to bottom, rgba(0,0,0,0.7), rgba(0,0,0,0));
     }
     
     .call-info {
       position: absolute;
-      top: 4rem;
+      top: 70px;
       left: 0;
       width: 100%;
       text-align: center;
       z-index: 3;
-      padding: 0 1rem;
     }
     
     .call-info h4 {
-      font-size: 1.5rem;
+      font-size: 1.4rem;
       font-weight: 600;
-      margin-bottom: 0.25rem;
+      margin-bottom: 5px;
       text-shadow: 0 2px 4px rgba(0,0,0,0.5);
     }
     
-    .call-info p {
-      font-size: 0.95rem;
-      opacity: 0.9;
-      margin: 0;
+    .call-status {
       display: inline-flex;
       align-items: center;
-      gap: 0.5rem;
-      background: var(--overlay-color);
-      padding: 0.25rem 0.75rem;
-      border-radius: 2rem;
+      gap: 8px;
+      background: var(--overlay);
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 0.9rem;
     }
     
-    .call-controls {
-      position: absolute;
-      bottom: 2rem;
-      left: 0;
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      gap: 1.5rem;
-      z-index: 4;
-    }
-    
-    .call-controls button {
-      width: 3.5rem;
-      height: 3.5rem;
+    .status-dot {
+      width: 10px;
+      height: 10px;
       border-radius: 50%;
-      border: none;
-      font-size: 1.25rem;
-      color: var(--light-color);
-      background: var(--glass-color);
-      backdrop-filter: blur(10px);
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
     
-    .call-controls button:hover {
-      transform: scale(1.1);
-      box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
-    }
-    
-    .call-controls button:active {
-      transform: scale(0.95);
-    }
-    
-    .call-controls .btn-danger {
-      background: var(--danger-color) !important;
-    }
-    
-    .call-controls .btn-danger:hover {
-      background: #dc2626 !important;
-    }
-    
-    .call-controls .btn-success {
-      background: var(--success-color) !important;
-    }
-    
-    .call-controls .btn-success:hover {
-      background: #0d9488 !important;
-    }
-    
-    .status-indicator {
-      width: 0.75rem;
-      height: 0.75rem;
-      border-radius: 50%;
-      display: inline-block;
-    }
-    
-    .status-idle {
-      background-color: #64748b;
-    }
-    
-    .status-connecting {
-      background-color: #f59e0b;
-      animation: pulse 1.5s infinite;
-    }
-    
-    .status-active {
-      background-color: #10b981;
-    }
-    
-    .status-error {
-      background-color: #ef4444;
-    }
+    .status-idle { background: #64748b; }
+    .status-connecting { background: #f59e0b; animation: pulse 1.5s infinite; }
+    .status-active { background: #10b981; }
+    .status-error { background: var(--danger); }
     
     @keyframes pulse {
       0% { opacity: 1; }
@@ -193,81 +112,95 @@
       100% { opacity: 1; }
     }
     
-    .permission-modal .modal-content {
-      background: var(--dark-color);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 0.75rem;
+    .call-controls {
+      position: absolute;
+      bottom: 30px;
+      left: 0;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      z-index: 4;
     }
     
-    .permission-modal .modal-header {
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-    }
-    
-    .permission-modal .modal-footer {
-      border-top: 1px solid rgba(255,255,255,0.1);
-    }
-    
-    .btn-close-white {
-      filter: invert(1) grayscale(100%) brightness(200%);
-    }
-    
-    .glass-card {
-      background: var(--glass-color);
+    .control-btn {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      border: none;
+      font-size: 1.3rem;
+      color: white;
+      background: var(--glass);
       backdrop-filter: blur(10px);
-      border-radius: 0.75rem;
-      border: 1px solid rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
     }
     
-    .form-control-dark {
-      background-color: rgba(0,0,0,0.3);
-      border: 1px solid rgba(255,255,255,0.1);
-      color: var(--light-color);
+    .control-btn:hover {
+      transform: scale(1.1);
     }
     
-    .form-control-dark:focus {
-      background-color: rgba(0,0,0,0.5);
-      border-color: var(--primary-color);
-      color: var(--light-color);
+    .control-btn:active {
+      transform: scale(0.95);
+    }
+    
+    .control-btn.end-call {
+      background: var(--danger);
+    }
+    
+    .control-btn.screen-share {
+      background: var(--success);
+    }
+    
+    .modal-content {
+      background: var(--dark);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: white;
+    }
+    
+    .form-control {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: white;
+    }
+    
+    .form-control:focus {
+      background: rgba(0,0,0,0.5);
+      border-color: var(--primary);
+      color: white;
       box-shadow: 0 0 0 0.25rem rgba(99, 102, 241, 0.25);
     }
     
     .btn-primary {
-      background-color: var(--primary-color);
-      border-color: var(--primary-color);
-    }
-    
-    .btn-primary:hover {
-      background-color: #4f46e5;
-      border-color: #4f46e5;
-    }
-    
-    .toast-container {
-      position: fixed;
-      top: 1rem;
-      right: 1rem;
-      z-index: 9999;
+      background: var(--primary);
+      border-color: var(--primary);
     }
     
     .toast {
-      background: var(--dark-color);
+      background: var(--dark);
       border: 1px solid rgba(255,255,255,0.1);
     }
     
+    /* Mobile responsiveness */
     @media (max-width: 768px) {
       #localVideo {
-        width: 90px;
-        height: 135px;
+        width: 100px;
+        height: 140px;
       }
       
       .call-controls {
-        gap: 1rem;
-        bottom: 1rem;
+        bottom: 20px;
+        gap: 12px;
       }
       
-      .call-controls button {
-        width: 3rem;
-        height: 3rem;
-        font-size: 1.1rem;
+      .control-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 1.2rem;
       }
       
       .call-info h4 {
@@ -279,55 +212,53 @@
       #localVideo {
         width: 80px;
         height: 120px;
+        top: 10px;
+        right: 10px;
       }
       
       .call-controls {
-        gap: 0.75rem;
+        bottom: 15px;
+        gap: 10px;
       }
       
-      .call-controls button {
-        width: 2.75rem;
-        height: 2.75rem;
-        font-size: 1rem;
+      .control-btn {
+        width: 45px;
+        height: 45px;
+        font-size: 1.1rem;
       }
     }
   </style>
 </head>
 <body>
-  <div class="video-call-wrapper">
+  <div class="video-container">
     <video id="remoteVideo" autoplay playsinline></video>
     <video id="localVideo" autoplay muted playsinline></video>
     
     <div class="call-header">
-      <button class="btn btn-outline-light btn-sm" id="room-btn" data-bs-toggle="modal" data-bs-target="#roomModal">
-        <i class="bi bi-people-fill me-1"></i> Room
+      <button class="btn btn-sm btn-outline-light" data-bs-toggle="modal" data-bs-target="#roomModal">
+        <i class="bi bi-people me-1"></i> Room
       </button>
-      <div class="d-flex gap-2">
-        <button class="btn btn-outline-light btn-sm" id="settings-btn" data-bs-toggle="modal" data-bs-target="#settingsModal">
-          <i class="bi bi-gear-fill"></i>
-        </button>
-      </div>
     </div>
     
     <div class="call-info">
-      <h4 id="caller-name">Mehedi Al Hasan Sawon</h4>
-      <p id="call-status">
-        <span class="status-indicator status-idle"></span>
-        <span>Idle</span>
-      </p>
+      <h4 id="userName">Guest</h4>
+      <div class="call-status">
+        <span class="status-dot status-idle"></span>
+        <span id="statusText">Idle</span>
+      </div>
     </div>
     
     <div class="call-controls">
-      <button id="mute-btn" title="Mute">
+      <button id="muteBtn" class="control-btn" title="Mute">
         <i class="bi bi-mic-fill"></i>
       </button>
-      <button id="leave-btn" class="btn-danger" title="End Call">
+      <button id="endCallBtn" class="control-btn end-call" title="End Call">
         <i class="bi bi-telephone-x-fill"></i>
       </button>
-      <button id="video-btn" title="Video Off">
+      <button id="videoBtn" class="control-btn" title="Turn Off Video">
         <i class="bi bi-camera-video-fill"></i>
       </button>
-      <button id="screen-btn" title="Share Screen">
+      <button id="screenBtn" class="control-btn screen-share" title="Share Screen">
         <i class="bi bi-laptop"></i>
       </button>
     </div>
@@ -336,99 +267,35 @@
   <!-- Room Modal -->
   <div class="modal fade" id="roomModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content glass-card text-white">
-        <div class="modal-header border-0">
-          <h5 class="modal-title">Room Access</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body d-flex flex-column gap-3">
-          <div>
-            <label for="room-id" class="form-label">Room ID</label>
-            <input type="text" id="room-id" class="form-control form-control-dark" placeholder="Enter room ID">
-          </div>
-          <div>
-            <label for="user-name" class="form-label">Your Name</label>
-            <input type="text" id="user-name" class="form-control form-control-dark" placeholder="Your name" value="Mehedi Al Hasan Sawon">
-          </div>
-          <div class="d-flex gap-2">
-            <button id="create-btn" class="btn btn-primary flex-grow-1" data-bs-dismiss="modal">
-              <i class="bi bi-plus-circle me-1"></i> Create Room
-            </button>
-            <button id="join-btn" class="btn btn-success flex-grow-1" data-bs-dismiss="modal">
-              <i class="bi bi-arrow-right-circle me-1"></i> Join Room
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  
-  <!-- Settings Modal -->
-  <div class="modal fade" id="settingsModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content glass-card text-white">
-        <div class="modal-header border-0">
-          <h5 class="modal-title">Settings</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <div class="mb-3">
-            <label for="camera-select" class="form-label">Camera</label>
-            <select id="camera-select" class="form-select form-control-dark">
-              <option value="">Loading cameras...</option>
-            </select>
-          </div>
-          <div class="mb-3">
-            <label for="mic-select" class="form-label">Microphone</label>
-            <select id="mic-select" class="form-select form-control-dark">
-              <option value="">Loading microphones...</option>
-            </select>
-          </div>
-          <div class="form-check form-switch mb-3">
-            <input class="form-check-input" type="checkbox" id="noise-suppression" checked>
-            <label class="form-check-label" for="noise-suppression">Noise Suppression</label>
-          </div>
-          <div class="form-check form-switch mb-3">
-            <input class="form-check-input" type="checkbox" id="echo-cancellation" checked>
-            <label class="form-check-label" for="echo-cancellation">Echo Cancellation</label>
-          </div>
-        </div>
-        <div class="modal-footer border-0">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary" id="apply-settings">Apply</button>
-        </div>
-      </div>
-    </div>
-  </div>
-  
-  <!-- Permission Modal -->
-  <div class="modal fade permission-modal" id="permissionModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
-        <div class="modal-header border-0">
-          <h5 class="modal-title">Permissions Required</h5>
+        <div class="modal-header">
+          <h5 class="modal-title">Join or Create Room</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <p>This application requires access to your camera and microphone to make video calls. Please allow the permissions when prompted.</p>
-          <div class="alert alert-warning d-flex align-items-center mt-3" role="alert">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i>
-            <div>
-              If you don't see the permission prompt, check your browser's address bar for the permission icon.
-            </div>
+          <div class="mb-3">
+            <label for="nameInput" class="form-label">Your Name</label>
+            <input type="text" class="form-control" id="nameInput" placeholder="Enter your name">
+          </div>
+          <div class="mb-3">
+            <label for="roomInput" class="form-label">Room ID</label>
+            <input type="text" class="form-control" id="roomInput" placeholder="Enter room ID">
           </div>
         </div>
-        <div class="modal-footer border-0">
-          <button type="button" class="btn btn-primary" id="request-permission">Allow Access</button>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" id="createBtn" class="btn btn-primary">Create Room</button>
+          <button type="button" id="joinBtn" class="btn btn-success">Join Room</button>
         </div>
       </div>
     </div>
   </div>
   
-  <!-- Toast Notifications -->
-  <div class="toast-container">
-    <div class="toast align-items-center text-white" id="notification-toast" role="alert" aria-live="assertive" aria-atomic="true">
+  <!-- Toast Notification -->
+  <div class="toast-container position-fixed top-0 end-0 p-3">
+    <div id="toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
       <div class="d-flex">
-        <div class="toast-body"></div>
+        <div class="toast-body" id="toastMessage"></div>
         <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
       </div>
     </div>
@@ -438,7 +305,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
   <script>
-    // Firebase configuration
+    // Firebase Configuration
     const firebaseConfig = {
       apiKey: "AIzaSyB4CQ3uiTxrvmbbXM01vcB_LjeW7Lk6ogI",
       authDomain: "adui-3ee05.firebaseapp.com",
@@ -453,361 +320,131 @@
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
 
-    // DOM elements
-    const remoteVideo = document.getElementById("remoteVideo");
-    const localVideo = document.getElementById("localVideo");
-    const statusText = document.getElementById("call-status");
-    const statusIndicator = document.querySelector(".status-indicator");
-    const muteBtn = document.getElementById("mute-btn");
-    const leaveBtn = document.getElementById("leave-btn");
-    const videoBtn = document.getElementById("video-btn");
-    const screenBtn = document.getElementById("screen-btn");
-    const roomBtn = document.getElementById("room-btn");
-    const createBtn = document.getElementById("create-btn");
-    const joinBtn = document.getElementById("join-btn");
-    const roomIdInput = document.getElementById("room-id");
-    const userNameInput = document.getElementById("user-name");
-    const callerName = document.getElementById("caller-name");
-    const requestPermissionBtn = document.getElementById("request-permission");
-    const cameraSelect = document.getElementById("camera-select");
-    const micSelect = document.getElementById("mic-select");
-    const applySettingsBtn = document.getElementById("apply-settings");
-    const notificationToast = new bootstrap.Toast(document.getElementById('notification-toast'));
-    
+    // DOM Elements
+    const remoteVideo = document.getElementById('remoteVideo');
+    const localVideo = document.getElementById('localVideo');
+    const userNameDisplay = document.getElementById('userName');
+    const statusText = document.getElementById('statusText');
+    const statusDot = document.querySelector('.status-dot');
+    const muteBtn = document.getElementById('muteBtn');
+    const endCallBtn = document.getElementById('endCallBtn');
+    const videoBtn = document.getElementById('videoBtn');
+    const screenBtn = document.getElementById('screenBtn');
+    const nameInput = document.getElementById('nameInput');
+    const roomInput = document.getElementById('roomInput');
+    const createBtn = document.getElementById('createBtn');
+    const joinBtn = document.getElementById('joinBtn');
+    const toast = new bootstrap.Toast(document.getElementById('toast'));
+    const toastMessage = document.getElementById('toastMessage');
+    const roomModal = new bootstrap.Modal(document.getElementById('roomModal'));
+
     // Variables
     let localStream;
     let peerConnection;
     let screenStream;
-    let currentRoomId = "";
+    let currentRoomId = '';
     let isMuted = false;
     let isVideoOff = false;
     let isScreenSharing = false;
-    let currentCameraId = "";
-    let currentMicId = "";
-    
-    // Configuration
-    const config = { 
+    let currentUserName = '';
+
+    // ICE Servers Configuration
+    const pcConfig = {
       iceServers: [
-        { urls: "stun:stun.l.google.com:19302" },
-        { urls: "stun:stun1.l.google.com:19302" },
-        { urls: "stun:stun2.l.google.com:19302" }
-      ] 
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' },
+        { urls: 'stun:stun2.l.google.com:19302' }
+      ]
     };
-    
-    // Initialize modals
-    const roomModal = new bootstrap.Modal(document.getElementById('roomModal'));
-    const settingsModal = new bootstrap.Modal(document.getElementById('settingsModal'));
-    const permissionModal = new bootstrap.Modal(document.getElementById('permissionModal'));
-    
-    // Show permission modal on load if not granted
-    document.addEventListener('DOMContentLoaded', async () => {
-      try {
-        const permissionStatus = await navigator.permissions.query({ name: 'camera' });
-        if (permissionStatus.state !== 'granted') {
-          permissionModal.show();
-        }
-      } catch (e) {
-        console.log("Permission API not supported");
-      }
+
+    // Initialize the app
+    init();
+
+    function init() {
+      setupEventListeners();
+      checkPermissions();
+    }
+
+    function setupEventListeners() {
+      // Control buttons
+      muteBtn.addEventListener('click', toggleMute);
+      endCallBtn.addEventListener('click', endCall);
+      videoBtn.addEventListener('click', toggleVideo);
+      screenBtn.addEventListener('click', toggleScreenShare);
       
-      // Load device list
-      updateDeviceLists();
-    });
-    
-    // Request permission button handler
-    requestPermissionBtn.addEventListener('click', async () => {
+      // Room buttons
+      createBtn.addEventListener('click', () => startCall(true));
+      joinBtn.addEventListener('click', () => startCall(false));
+      
+      // Before unload cleanup
+      window.addEventListener('beforeunload', cleanup);
+    }
+
+    async function checkPermissions() {
       try {
-        await updateDeviceLists();
-        permissionModal.hide();
-        showNotification('Permissions granted!', 'success');
-      } catch (error) {
-        showNotification('Failed to get permissions: ' + error.message, 'error');
-      }
-    });
-    
-    // Update device lists
-    async function updateDeviceLists() {
-      try {
+        // Check if we already have permissions
         const devices = await navigator.mediaDevices.enumerateDevices();
-        const cameras = devices.filter(device => device.kind === 'videoinput');
-        const mics = devices.filter(device => device.kind === 'audioinput');
+        const hasVideoPermission = devices.some(device => device.kind === 'videoinput' && device.label);
+        const hasAudioPermission = devices.some(device => device.kind === 'audioinput' && device.label);
         
-        // Update camera select
-        cameraSelect.innerHTML = '';
-        cameras.forEach(camera => {
-          const option = document.createElement('option');
-          option.value = camera.deviceId;
-          option.text = camera.label || `Camera ${cameraSelect.length + 1}`;
-          cameraSelect.appendChild(option);
-        });
-        
-        // Update mic select
-        micSelect.innerHTML = '';
-        mics.forEach(mic => {
-          const option = document.createElement('option');
-          option.value = mic.deviceId;
-          option.text = mic.label || `Microphone ${micSelect.length + 1}`;
-          micSelect.appendChild(option);
-        });
-        
-        return true;
+        if (!hasVideoPermission || !hasAudioPermission) {
+          showToast('Please allow camera and microphone access');
+        }
       } catch (error) {
-        console.error('Error enumerating devices:', error);
-        showNotification('Error accessing devices', 'error');
-        return false;
+        console.error('Error checking permissions:', error);
       }
     }
-    
-    // Apply settings button handler
-    applySettingsBtn.addEventListener('click', async () => {
-      const selectedCamera = cameraSelect.value;
-      const selectedMic = micSelect.value;
-      const noiseSuppression = document.getElementById('noise-suppression').checked;
-      const echoCancellation = document.getElementById('echo-cancellation').checked;
+
+    async function startCall(isCreator) {
+      currentUserName = nameInput.value.trim();
+      const roomId = roomInput.value.trim();
       
-      if (localStream) {
-        localStream.getTracks().forEach(track => track.stop());
-      }
-      
-      try {
-        localStream = await navigator.mediaDevices.getUserMedia({
-          video: selectedCamera ? { 
-            deviceId: { exact: selectedCamera },
-            width: { ideal: 1280 },
-            height: { ideal: 720 },
-            frameRate: { ideal: 30 }
-          } : true,
-          audio: selectedMic ? { 
-            deviceId: { exact: selectedMic },
-            noiseSuppression: noiseSuppression,
-            echoCancellation: echoCancellation
-          } : {
-            noiseSuppression: noiseSuppression,
-            echoCancellation: echoCancellation
-          }
-        });
-        
-        localVideo.srcObject = localStream;
-        currentCameraId = selectedCamera;
-        currentMicId = selectedMic;
-        
-        if (peerConnection) {
-          // Replace tracks in the peer connection
-          const sender = peerConnection.getSenders();
-          localStream.getTracks().forEach(track => {
-            const existingSender = sender.find(s => s.track.kind === track.kind);
-            if (existingSender) {
-              existingSender.replaceTrack(track);
-            }
-          });
-        }
-        
-        settingsModal.hide();
-        showNotification('Settings applied successfully', 'success');
-      } catch (error) {
-        console.error('Error applying settings:', error);
-        showNotification('Failed to apply settings: ' + error.message, 'error');
-      }
-    });
-    
-    // Mute button handler
-    muteBtn.addEventListener('click', () => {
-      if (!localStream) return;
-      
-      isMuted = !isMuted;
-      localStream.getAudioTracks()[0].enabled = !isMuted;
-      muteBtn.innerHTML = isMuted ? '<i class="bi bi-mic-mute-fill"></i>' : '<i class="bi bi-mic-fill"></i>';
-      muteBtn.title = isMuted ? 'Unmute' : 'Mute';
-      
-      showNotification(isMuted ? 'Microphone muted' : 'Microphone unmuted', 'info');
-    });
-    
-    // Video button handler
-    videoBtn.addEventListener('click', () => {
-      if (!localStream) return;
-      
-      isVideoOff = !isVideoOff;
-      localStream.getVideoTracks()[0].enabled = !isVideoOff;
-      videoBtn.innerHTML = isVideoOff ? '<i class="bi bi-camera-video-off-fill"></i>' : '<i class="bi bi-camera-video-fill"></i>';
-      videoBtn.title = isVideoOff ? 'Video On' : 'Video Off';
-      
-      showNotification(isVideoOff ? 'Video turned off' : 'Video turned on', 'info');
-    });
-    
-    // Screen share button handler
-    screenBtn.addEventListener('click', async () => {
-      if (isScreenSharing) {
-        await stopScreenShare();
-      } else {
-        await startScreenShare();
-      }
-    });
-    
-    // Start screen sharing
-    async function startScreenShare() {
-      try {
-        screenStream = await navigator.mediaDevices.getDisplayMedia({
-          video: true,
-          audio: false
-        });
-        
-        // Replace the video track in the peer connection
-        const videoTrack = screenStream.getVideoTracks()[0];
-        const senders = peerConnection.getSenders();
-        const videoSender = senders.find(s => s.track.kind === 'video');
-        
-        if (videoSender) {
-          await videoSender.replaceTrack(videoTrack);
-        }
-        
-        // Show screen in local video
-        localVideo.srcObject = screenStream;
-        
-        isScreenSharing = true;
-        screenBtn.innerHTML = '<i class="bi bi-stop-fill"></i>';
-        screenBtn.title = 'Stop Sharing';
-        screenBtn.classList.add('btn-success');
-        
-        showNotification('Screen sharing started', 'success');
-        
-        // Handle when user stops screen sharing
-        videoTrack.onended = () => {
-          stopScreenShare();
-        };
-      } catch (error) {
-        console.error('Error starting screen share:', error);
-        showNotification('Screen sharing failed: ' + error.message, 'error');
-      }
-    }
-    
-    // Stop screen sharing
-    async function stopScreenShare() {
-      if (!screenStream) return;
-      
-      // Replace with camera track
-      if (localStream) {
-        const videoTrack = localStream.getVideoTracks()[0];
-        const senders = peerConnection.getSenders();
-        const videoSender = senders.find(s => s.track.kind === 'video');
-        
-        if (videoSender) {
-          await videoSender.replaceTrack(videoTrack);
-        }
-        
-        localVideo.srcObject = localStream;
-      }
-      
-      // Stop screen tracks
-      screenStream.getTracks().forEach(track => track.stop());
-      screenStream = null;
-      
-      isScreenSharing = false;
-      screenBtn.innerHTML = '<i class="bi bi-laptop"></i>';
-      screenBtn.title = 'Share Screen';
-      screenBtn.classList.remove('btn-success');
-      
-      showNotification('Screen sharing stopped', 'info');
-    }
-    
-    // Leave button handler
-    leaveBtn.addEventListener('click', () => {
-      if (peerConnection) {
-        peerConnection.close();
-        database.ref(`calls/${currentRoomId}`).off();
-        database.ref(`calls/${currentRoomId}`).remove();
-      }
-      
-      if (localStream) {
-        localStream.getTracks().forEach(track => track.stop());
-      }
-      
-      if (screenStream) {
-        screenStream.getTracks().forEach(track => track.stop());
-      }
-      
-      remoteVideo.srcObject = null;
-      localVideo.srcObject = null;
-      
-      updateStatus('Idle', 'status-idle');
-      currentRoomId = "";
-      
-      // Reset buttons
-      isMuted = false;
-      muteBtn.innerHTML = '<i class="bi bi-mic-fill"></i>';
-      muteBtn.title = 'Mute';
-      
-      isVideoOff = false;
-      videoBtn.innerHTML = '<i class="bi bi-camera-video-fill"></i>';
-      videoBtn.title = 'Video Off';
-      
-      isScreenSharing = false;
-      screenBtn.innerHTML = '<i class="bi bi-laptop"></i>';
-      screenBtn.title = 'Share Screen';
-      screenBtn.classList.remove('btn-success');
-      
-      showNotification('Call ended', 'info');
-    });
-    
-    // Create or join room handler
-    async function handleCall(isCreator) {
-      const roomId = roomIdInput.value.trim();
-      const userName = userNameInput.value.trim();
-      
-      if (!roomId) {
-        showNotification('Room ID is required', 'error');
+      if (!currentUserName) {
+        showToast('Please enter your name');
         return;
       }
       
-      if (!userName) {
-        showNotification('Your name is required', 'error');
+      if (!roomId) {
+        showToast('Please enter a room ID');
         return;
       }
       
       currentRoomId = roomId;
-      callerName.textContent = userName;
+      userNameDisplay.textContent = currentUserName;
+      roomModal.hide();
       
       try {
-        // Get user media with selected devices or default
-        const constraints = {
-          video: currentCameraId ? { 
-            deviceId: { exact: currentCameraId },
-            width: { ideal: 1280 },
-            height: { ideal: 720 },
-            frameRate: { ideal: 30 }
-          } : {
+        // Get user media with HD quality
+        localStream = await navigator.mediaDevices.getUserMedia({
+          video: {
             width: { ideal: 1280 },
             height: { ideal: 720 },
             frameRate: { ideal: 30 }
           },
-          audio: currentMicId ? { 
-            deviceId: { exact: currentMicId },
-            noiseSuppression: document.getElementById('noise-suppression').checked,
-            echoCancellation: document.getElementById('echo-cancellation').checked
-          } : {
-            noiseSuppression: document.getElementById('noise-suppression').checked,
-            echoCancellation: document.getElementById('echo-cancellation').checked
+          audio: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true
           }
-        };
+        });
         
-        localStream = await navigator.mediaDevices.getUserMedia(constraints);
         localVideo.srcObject = localStream;
-        
         updateStatus(isCreator ? 'Creating room...' : 'Joining room...', 'status-connecting');
         
         // Create peer connection
-        peerConnection = new RTCPeerConnection(config);
+        peerConnection = new RTCPeerConnection(pcConfig);
         
-        // Add local stream tracks to peer connection
+        // Add local stream tracks
         localStream.getTracks().forEach(track => {
           peerConnection.addTrack(track, localStream);
         });
         
-        // Handle remote stream
+        // Remote stream handler
         peerConnection.ontrack = event => {
           if (!remoteVideo.srcObject) {
             remoteVideo.srcObject = event.streams[0];
             updateStatus('In call', 'status-active');
-            showNotification('Call connected', 'success');
+            showToast('Call connected');
           }
         };
         
@@ -818,12 +455,11 @@
           }
         };
         
-        // ICE connection state change handler
+        // ICE connection state handler
         peerConnection.oniceconnectionstatechange = () => {
-          if (peerConnection.iceConnectionState === 'disconnected' || 
-              peerConnection.iceConnectionState === 'failed') {
-            updateStatus('Connection lost', 'status-error');
-            showNotification('Connection lost', 'error');
+          if (peerConnection.iceConnectionState === 'disconnected') {
+            updateStatus('Disconnected', 'status-error');
+            showToast('Connection lost');
           }
         };
         
@@ -831,28 +467,32 @@
         
         if (isCreator) {
           // Create offer
-          const offer = await peerConnection.createOffer();
+          const offer = await peerConnection.createOffer({
+            offerToReceiveAudio: true,
+            offerToReceiveVideo: true
+          });
+          
           await peerConnection.setLocalDescription(offer);
           
           // Save offer to database
-          await roomRef.child("offer").set(JSON.stringify(offer));
+          await roomRef.child('offer').set(JSON.stringify(offer));
           
           // Listen for answer
-          roomRef.child("answer").on("value", async snap => {
+          roomRef.child('answer').on('value', async snap => {
             if (snap.exists()) {
               const answer = JSON.parse(snap.val());
               await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
             }
           });
           
-          // Clean up after 1 hour
+          // Cleanup after 1 hour
           setTimeout(() => roomRef.remove(), 3600000);
         } else {
           // Get offer from database
-          const offerSnap = await roomRef.child("offer").get();
+          const offerSnap = await roomRef.child('offer').get();
           if (!offerSnap.exists()) {
             updateStatus('Room not found', 'status-error');
-            showNotification('Room not found', 'error');
+            showToast('Room not found');
             return;
           }
           
@@ -864,70 +504,112 @@
           await peerConnection.setLocalDescription(answer);
           
           // Save answer to database
-          await roomRef.child("answer").set(JSON.stringify(answer));
+          await roomRef.child('answer').set(JSON.stringify(answer));
         }
         
         // Listen for ICE candidates
-        roomRef.child("ice").on("child_added", snapshot => {
-          const candidate = JSON.parse(snapshot.val());
+        roomRef.child('ice').on('child_added', snap => {
+          const candidate = JSON.parse(snap.val());
           peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
         });
         
       } catch (error) {
-        console.error('Error setting up call:', error);
+        console.error('Call setup error:', error);
         updateStatus('Error', 'status-error');
-        showNotification('Call setup failed: ' + error.message, 'error');
-        
-        if (localStream) {
-          localStream.getTracks().forEach(track => track.stop());
-        }
-        
-        if (peerConnection) {
-          peerConnection.close();
-        }
+        showToast('Error setting up call: ' + error.message);
+        cleanup();
       }
     }
-    
-    // Create button handler
-    createBtn.addEventListener('click', () => handleCall(true));
-    
-    // Join button handler
-    joinBtn.addEventListener('click', () => handleCall(false));
-    
-    // Update status text and indicator
-    function updateStatus(text, statusClass) {
-      statusText.querySelector('span:last-child').textContent = text;
+
+    function toggleMute() {
+      if (!localStream) return;
       
-      // Remove all status classes
-      statusIndicator.classList.remove(
-        'status-idle', 'status-connecting', 'status-active', 'status-error'
-      );
+      isMuted = !isMuted;
+      localStream.getAudioTracks()[0].enabled = !isMuted;
+      muteBtn.innerHTML = isMuted ? '<i class="bi bi-mic-mute-fill"></i>' : '<i class="bi bi-mic-fill"></i>';
+      muteBtn.title = isMuted ? 'Unmute' : 'Mute';
+      showToast(isMuted ? 'Microphone muted' : 'Microphone unmuted');
+    }
+
+    function toggleVideo() {
+      if (!localStream) return;
       
-      // Add new status class
-      if (statusClass) {
-        statusIndicator.classList.add(statusClass);
+      isVideoOff = !isVideoOff;
+      localStream.getVideoTracks()[0].enabled = !isVideoOff;
+      videoBtn.innerHTML = isVideoOff ? '<i class="bi bi-camera-video-off-fill"></i>' : '<i class="bi bi-camera-video-fill"></i>';
+      videoBtn.title = isVideoOff ? 'Turn On Video' : 'Turn Off Video';
+      showToast(isVideoOff ? 'Video turned off' : 'Video turned on');
+    }
+
+    async function toggleScreenShare() {
+      if (isScreenSharing) {
+        await stopScreenShare();
+      } else {
+        await startScreenShare();
       }
     }
-    
-    // Show notification toast
-    function showNotification(message, type) {
-      const toastBody = document.querySelector('.toast-body');
-      toastBody.textContent = message;
-      
-      // Set background color based on type
-      const toast = document.getElementById('notification-toast');
-      toast.className = `toast align-items-center text-white bg-${type}`;
-      
-      notificationToast.show();
-      
-      // Auto hide after 3 seconds
-      setTimeout(() => {
-        notificationToast.hide();
-      }, 3000);
+
+    async function startScreenShare() {
+      try {
+        screenStream = await navigator.mediaDevices.getDisplayMedia({
+          video: {
+            width: { ideal: 1920 },
+            height: { ideal: 1080 },
+            frameRate: { ideal: 30 }
+          },
+          audio: false
+        });
+        
+        // Replace video track in peer connection
+        const videoTrack = screenStream.getVideoTracks()[0];
+        const sender = peerConnection.getSenders().find(s => s.track.kind === 'video');
+        
+        if (sender) {
+          await sender.replaceTrack(videoTrack);
+        }
+        
+        // Show screen in local video
+        localVideo.srcObject = screenStream;
+        
+        isScreenSharing = true;
+        screenBtn.innerHTML = '<i class="bi bi-stop-fill"></i>';
+        screenBtn.title = 'Stop Sharing';
+        showToast('Screen sharing started');
+        
+        // Handle when user stops sharing
+        videoTrack.onended = stopScreenShare;
+        
+      } catch (error) {
+        console.error('Screen share error:', error);
+        showToast('Screen sharing failed');
+      }
     }
-    
-    // Handle beforeunload to clean up
-    window.addEventListener('beforeunload', () => {
+
+    async function stopScreenShare() {
+      if (!screenStream || !localStream) return;
+      
+      // Replace with camera track
+      const videoTrack = localStream.getVideoTracks()[0];
+      const sender = peerConnection.getSenders().find(s => s.track.kind === 'video');
+      
+      if (sender) {
+        await sender.replaceTrack(videoTrack);
+      }
+      
+      // Stop screen tracks
+      screenStream.getTracks().forEach(track => track.stop());
+      screenStream = null;
+      
+      // Show camera in local video
+      localVideo.srcObject = localStream;
+      
+      isScreenSharing = false;
+      screenBtn.innerHTML = '<i class="bi bi-laptop"></i>';
+      screenBtn.title = 'Share Screen';
+      showToast('Screen sharing stopped');
+    }
+
+    function endCall() {
       if (peerConnection) {
         peerConnection.close();
       }
@@ -939,12 +621,61 @@
       
       if (localStream) {
         localStream.getTracks().forEach(track => track.stop());
+        localStream = null;
       }
       
       if (screenStream) {
         screenStream.getTracks().forEach(track => track.stop());
+        screenStream = null;
       }
-    });
+      
+      remoteVideo.srcObject = null;
+      localVideo.srcObject = null;
+      
+      updateStatus('Idle', 'status-idle');
+      currentRoomId = '';
+      isMuted = false;
+      isVideoOff = false;
+      isScreenSharing = false;
+      
+      // Reset buttons
+      muteBtn.innerHTML = '<i class="bi bi-mic-fill"></i>';
+      muteBtn.title = 'Mute';
+      videoBtn.innerHTML = '<i class="bi bi-camera-video-fill"></i>';
+      videoBtn.title = 'Turn Off Video';
+      screenBtn.innerHTML = '<i class="bi bi-laptop"></i>';
+      screenBtn.title = 'Share Screen';
+      
+      showToast('Call ended');
+    }
+
+    function cleanup() {
+      endCall();
+    }
+
+    function updateStatus(text, statusClass) {
+      statusText.textContent = text;
+      
+      // Remove all status classes
+      statusDot.classList.remove(
+        'status-idle', 'status-connecting', 'status-active', 'status-error'
+      );
+      
+      // Add new status class
+      if (statusClass) {
+        statusDot.classList.add(statusClass);
+      }
+    }
+
+    function showToast(message) {
+      toastMessage.textContent = message;
+      toast.show();
+      
+      // Auto hide after 3 seconds
+      setTimeout(() => {
+        toast.hide();
+      }, 3000);
+    }
   </script>
 </body>
 </html>

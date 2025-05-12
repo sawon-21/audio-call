@@ -3,296 +3,472 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HD Video Call</title>
+  <title>HoloCall - Futuristic Video Conference</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary: #6366f1;
-      --danger: #ef4444;
-      --success: #10b981;
-      --dark: #1e293b;
-      --light: #f8fafc;
-      --overlay: rgba(0, 0, 0, 0.7);
-      --glass: rgba(255, 255, 255, 0.15);
+      --neon-blue: #00ddebtesting: #00d4ff;
+      --neon-pink: #ff007a;
+      --dark-bg: #0a0e1f;
+      --holo-light: rgba(255, 255, 255, 0.1);
+      --glow: #00d4ff80;
+      --accent: #ff007a80;
+      --text-light: #e0e7ff;
     }
-    
-    body {
+
+    * {
       margin: 0;
       padding: 0;
-      height: 100vh;
-      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-      font-family: 'Segoe UI', system-ui, sans-serif;
-      color: var(--light);
-      overflow: hidden;
+      box-sizing: border-box;
     }
-    
-    .video-container {
+
+    body {
+      height: 100vh;
+      background: linear-gradient(135deg, var(--dark-bg), #1a1e3a);
+      font-family: 'Orbitron', sans-serif;
+      color: var(--text-light);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .holo-container {
       position: relative;
       width: 100%;
       height: 100%;
-    }
-    
-    #remoteVideo {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
       background: #000;
+      overflow: hidden;
     }
-    
-    #localVideo {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      width: 120px;
-      height: 170px;
-      border-radius: 12px;
-      border: 2px solid var(--light);
-      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-      object-fit: cover;
-      z-index: 2;
-      transition: all 0.3s ease;
-    }
-    
-    #localVideo:hover {
-      transform: scale(1.05);
-    }
-    
-    .call-header {
+
+    #remoteVideo, #localVideo {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
-      padding: 15px;
-      z-index: 3;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 20px;
+    }
+
+    #localVideo {
+      top: 30px;
+      right: 30px;
+      width: 220px;
+      height: 280px;
+      border: 2px solid var(--neon-blue);
+      box-shadow: 0 0 20px var(--glow);
+      z-index: 10;
+      transition: transform 0.3s ease;
+    }
+
+    #localVideo:hover {
+      transform: scale(1.1);
+    }
+
+    .holo-nav {
+      position: absolute;
+      top: 0;
+      width: 100%;
+      padding: 20px;
+      background: linear-gradient(to bottom, var(--holo-light), transparent);
       display: flex;
       justify-content: space-between;
+      align-items: center;
+      z-index: 15;
     }
-    
-    .call-info {
-      position: absolute;
-      top: 70px;
-      left: 0;
-      width: 100%;
-      text-align: center;
-      z-index: 3;
+
+    .nav-brand {
+      font-size: 1.8rem;
+      font-weight: 700;
+      background: linear-gradient(45deg, var(--neon-blue), var(--neon-pink));
+      -webkit-background-clip: text;
+      color: transparent;
+      text-shadow: 0 0 10px var(--glow);
     }
-    
-    .call-info h4 {
-      font-size: 1.4rem;
-      font-weight: 600;
-      margin-bottom: 5px;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+
+    .nav-actions {
+      display: flex;
+      gap: 15px;
     }
-    
-    .call-status {
-      display: inline-flex;
+
+    .nav-btn {
+      background: var(--holo-light);
+      border: 1px solid var(--neon-blue);
+      color: var(--text-light);
+      padding: 10px 20px;
+      border-radius: 50px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
       align-items: center;
       gap: 8px;
-      background: var(--overlay);
-      padding: 5px 15px;
-      border-radius: 20px;
-      font-size: 0.9rem;
+      box-shadow: 0 0 10px var(--glow);
     }
-    
-    .status-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
+
+    .nav-btn:hover {
+      background: var(--neon-blue);
+      box-shadow: 0 0 20px var(--glow);
+      transform: translateY(-3px);
     }
-    
-    .status-idle { background: #64748b; }
-    .status-connecting { background: #f59e0b; animation: pulse 1.5s infinite; }
-    .status-active { background: #10b981; }
-    .status-error { background: var(--danger); }
-    
-    @keyframes pulse {
-      0% { opacity: 1; }
-      50% { opacity: 0.5; }
-      100% { opacity: 1; }
-    }
-    
-    .call-controls {
+
+    .call-info {
       position: absolute;
-      bottom: 30px;
-      left: 0;
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      gap: 15px;
-      z-index: 4;
+      top: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--holo-light);
+      padding: 15px 30px;
+      border-radius: 15px;
+      border: 1px solid var(--neon-blue);
+      text-align: center;
+      z-index: 10;
+      max-width: 90%;
+      box-shadow: 0 0 15px var(--glow);
     }
-    
+
+    .call-info h4 {
+      font-size: 1.6rem;
+      margin: 0;
+      text-shadow: 0 0 8px var(--glow);
+    }
+
+    .participants {
+      font-size: 0.9rem;
+      opacity: 0.8;
+      margin-top: 8px;
+      font-family: 'Roboto', sans-serif;
+    }
+
+    .call-status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--holo-light);
+      padding: 8px 20px;
+      border-radius: 25px;
+      margin-top: 10px;
+      font-size: 0.85rem;
+    }
+
+    .status-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--glow);
+    }
+
+    .status-idle { background: #6b7280; }
+    .status-connecting { background: #f59e0b; animation: pulse 1.5s infinite; }
+    .status-active { background: #22c55e; }
+    .status-error { background: #ef4444; }
+
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.4); opacity: 0.6; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .holo-controls {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 20px;
+      background: var(--holo-light);
+      padding: 15px;
+      border-radius: 50px;
+      border: 1px solid var(--neon-blue);
+      z-index: 15;
+      box-shadow: 0 0 20px var(--glow);
+    }
+
     .control-btn {
-      width: 56px;
-      height: 56px;
+      width: 65px;
+      height: 65px;
       border-radius: 50%;
       border: none;
-      font-size: 1.3rem;
-      color: white;
-      background: var(--glass);
-      backdrop-filter: blur(10px);
+      font-size: 1.6rem;
+      color: var(--text-light);
+      background: var(--holo-light);
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      transition: all 0.2s ease;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      transition: all 0.3s ease;
+      box-shadow: 0 0 10px var(--glow);
     }
-    
+
     .control-btn:hover {
-      transform: scale(1.1);
+      background: var(--neon-blue);
+      transform: scale(1.15);
+      box-shadow: 0 0 20px var(--glow);
     }
-    
-    .control-btn:active {
-      transform: scale(0.95);
+
+    .control-btn.active {
+      background: var(--neon-pink);
+      box-shadow: 0 0 20px var(--accent);
     }
-    
+
     .control-btn.end-call {
-      background: var(--danger);
+      background: #ef4444;
     }
-    
+
     .control-btn.screen-share {
-      background: var(--success);
+      background: #22c55e;
     }
-    
+
     .modal-content {
-      background: var(--dark);
-      border: 1px solid rgba(255,255,255,0.1);
-      color: white;
+      background: var(--dark-bg);
+      border: 1px solid var(--neon-blue);
+      border-radius: 20px;
+      color: var(--text-light);
+      box-shadow: 0 0 30px var(--glow);
     }
-    
+
     .form-control {
-      background: rgba(0,0,0,0.3);
-      border: 1px solid rgba(255,255,255,0.1);
-      color: white;
+      background: var(--holo-light);
+      border: 1px solid var(--neon-blue);
+      color: var(--text-light);
+      border-radius: 10px;
+      font-family: 'Roboto', sans-serif;
     }
-    
+
     .form-control:focus {
-      background: rgba(0,0,0,0.5);
-      border-color: var(--primary);
-      color: white;
-      box-shadow: 0 0 0 0.25rem rgba(99, 102, 241, 0.25);
+      border-color: var(--neon-blue);
+      box-shadow: 0 0 10px var(--glow);
+      background: rgba(255, 255, 255, 0.05);
     }
-    
+
     .btn-primary {
-      background: var(--primary);
-      border-color: var(--primary);
+      background: var(--neon-blue);
+      border: none;
+      border-radius: 10px;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 10px var(--glow);
     }
-    
+
+    .btn-primary:hover {
+      background: var(--neon-pink);
+      box-shadow: 0 0 20px var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .btn-success {
+      background: #22c55e;
+      border: none;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #22c55e80;
+    }
+
+    .btn-success:hover {
+      background: #16a34a;
+      box-shadow: 0 0 20px #16a34a80;
+    }
+
     .toast {
-      background: var(--dark);
-      border: 1px solid rgba(255,255,255,0.1);
+      background: var(--dark-bg);
+      border: 1px solid var(--neon-blue);
+      border-radius: 15px;
+      color: var(--text-light);
+      box-shadow: 0 0 15px var(--glow);
     }
-    
-    /* Mobile responsiveness */
+
+    .holo-loader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(10, 14, 31, 0.9);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.5s ease;
+    }
+
+    .holo-loader.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .spinner {
+      width: 100px;
+      height: 100px;
+      border: 10px solid var(--holo-light);
+      border-top-color: var(--neon-blue);
+      border-radius: 50%;
+      animation: spin 1.2s linear infinite;
+      box-shadow: 0 0 30px var(--glow);
+    }
+
+    .loader-text {
+      margin-top: 20px;
+      font-size: 1.2rem;
+      text-shadow: 0 0 10px var(--glow);
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Responsive Design */
     @media (max-width: 768px) {
       #localVideo {
-        width: 100px;
-        height: 140px;
+        width: 180px;
+        height: 220px;
+        top: 20px;
+        right: 20px;
       }
-      
-      .call-controls {
+
+      .holo-controls {
+        bottom: 30px;
+        gap: 15px;
+        padding: 12px;
+      }
+
+      .control-btn {
+        width: 55px;
+        height: 55px;
+        font-size: 1.4rem;
+      }
+
+      .call-info {
+        top: 90px;
+        padding: 12px 20px;
+      }
+
+      .call-info h4 {
+        font-size: 1.4rem;
+      }
+
+      .nav-brand {
+        font-size: 1.5rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      #localVideo {
+        width: 140px;
+        height: 180px;
+        top: 15px;
+        right: 15px;
+      }
+
+      .holo-controls {
         bottom: 20px;
-        gap: 12px;
+        gap: 10px;
+        padding: 10px;
       }
-      
+
       .control-btn {
         width: 50px;
         height: 50px;
-        font-size: 1.2rem;
+        font-size: 1.3rem;
       }
-      
+
+      .call-info {
+        top: 80px;
+        padding: 10px 15px;
+      }
+
       .call-info h4 {
         font-size: 1.2rem;
       }
-    }
-    
-    @media (max-width: 480px) {
-      #localVideo {
-        width: 80px;
-        height: 120px;
-        top: 10px;
-        right: 10px;
+
+      .nav-brand {
+        font-size: 1.3rem;
       }
-      
-      .call-controls {
-        bottom: 15px;
-        gap: 10px;
-      }
-      
-      .control-btn {
-        width: 45px;
-        height: 45px;
-        font-size: 1.1rem;
+
+      .nav-btn {
+        padding: 8px 15px;
+        font-size: 0.85rem;
       }
     }
   </style>
 </head>
 <body>
-  <div class="video-container">
+  <div class="holo-loader" id="loader">
+    <div class="spinner"></div>
+    <div class="loader-text">Connecting to HoloCall...</div>
+  </div>
+
+  <div class="holo-container">
     <video id="remoteVideo" autoplay playsinline></video>
     <video id="localVideo" autoplay muted playsinline></video>
-    
-    <div class="call-header">
-      <button class="btn btn-sm btn-outline-light" data-bs-toggle="modal" data-bs-target="#roomModal">
-        <i class="bi bi-people me-1"></i> Room
-      </button>
-    </div>
-    
+
+    <nav class="holo-nav">
+      <span class="nav-brand">HoloCall</span>
+      <div class="nav-actions">
+        <button class="nav-btn" data-bs-toggle="modal" data-bs-target="#roomModal">
+          <i class="bi bi-person-lines-fill"></i> Room
+        </button>
+        <button class="nav-btn" id="infoBtn">
+          <i class="bi bi-info-circle-fill"></i> Info
+        </button>
+      </div>
+    </nav>
+
     <div class="call-info">
       <h4 id="userName">Guest</h4>
+      <div class="participants" id="participants">Awaiting connections...</div>
       <div class="call-status">
         <span class="status-dot status-idle"></span>
         <span id="statusText">Idle</span>
       </div>
     </div>
-    
-    <div class="call-controls">
-      <button id="muteBtn" class="control-btn" title="Mute">
+
+    <div class="holo-controls">
+      <button id="muteBtn" class="control-btn" title="Toggle Microphone">
         <i class="bi bi-mic-fill"></i>
       </button>
-      <button id="endCallBtn" class="control-btn end-call" title="End Call">
-        <i class="bi bi-telephone-x-fill"></i>
-      </button>
-      <button id="videoBtn" class="control-btn" title="Turn Off Video">
+      <button id="videoBtn" class="control-btn" title="Toggle Video">
         <i class="bi bi-camera-video-fill"></i>
       </button>
       <button id="screenBtn" class="control-btn screen-share" title="Share Screen">
-        <i class="bi bi-laptop"></i>
+        <i class="bi bi-display-fill"></i>
+      </button>
+      <button id="endCallBtn" class="control-btn end-call" title="End Call">
+        <i class="bi bi-x-circle-fill"></i>
       </button>
     </div>
   </div>
-  
+
   <!-- Room Modal -->
   <div class="modal fade" id="roomModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">Join or Create Room</h5>
+          <h5 class="modal-title">Enter HoloCall Room</h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <div class="mb-3">
+          <div class="mb-4">
             <label for="nameInput" class="form-label">Your Name</label>
-            <input type="text" class="form-control" id="nameInput" placeholder="Enter your name">
+            <input type="text" class="form-control" id="nameInput" placeholder="Enter your name" required>
           </div>
-          <div class="mb-3">
+          <div class="mb-4">
             <label for="roomInput" class="form-label">Room ID</label>
-            <input type="text" class="form-control" id="roomInput" placeholder="Enter room ID">
+            <input type="text" class="form-control" id="roomInput" placeholder="Enter or create room ID" required>
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
           <button type="button" id="createBtn" class="btn btn-primary">Create Room</button>
           <button type="button" id="joinBtn" class="btn btn-success">Join Room</button>
         </div>
       </div>
     </div>
   </div>
-  
+
   <!-- Toast Notification -->
-  <div class="toast-container position-fixed top-0 end-0 p-3">
+  <div class="toast-container position-fixed bottom-0 end-0 p-3">
     <div id="toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
       <div class="d-flex">
         <div class="toast-body" id="toastMessage"></div>
@@ -302,10 +478,10 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
   <script>
-    // Firebase Configuration
+    // Firebase Configuration (Replace with your Firebase project config)
     const firebaseConfig = {
       apiKey: "AIzaSyB4CQ3uiTxrvmbbXM01vcB_LjeW7Lk6ogI",
       authDomain: "adui-3ee05.firebaseapp.com",
@@ -318,7 +494,7 @@
 
     // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
+    const db = firebase.database();
 
     // DOM Elements
     const remoteVideo = document.getElementById('remoteVideo');
@@ -327,9 +503,9 @@
     const statusText = document.getElementById('statusText');
     const statusDot = document.querySelector('.status-dot');
     const muteBtn = document.getElementById('muteBtn');
-    const endCallBtn = document.getElementById('endCallBtn');
     const videoBtn = document.getElementById('videoBtn');
     const screenBtn = document.getElementById('screenBtn');
+    const endCallBtn = document.getElementById('endCallBtn');
     const nameInput = document.getElementById('nameInput');
     const roomInput = document.getElementById('roomInput');
     const createBtn = document.getElementById('createBtn');
@@ -337,89 +513,87 @@
     const toast = new bootstrap.Toast(document.getElementById('toast'));
     const toastMessage = document.getElementById('toastMessage');
     const roomModal = new bootstrap.Modal(document.getElementById('roomModal'));
+    const participantsDisplay = document.getElementById('participants');
+    const loader = document.getElementById('loader');
+    const infoBtn = document.getElementById('infoBtn');
 
-    // Variables
-    let localStream;
-    let peerConnection;
-    let screenStream;
+    // State
+    let localStream = null;
+    let peerConnection = null;
+    let screenStream = null;
     let currentRoomId = '';
     let isMuted = false;
     let isVideoOff = false;
     let isScreenSharing = false;
     let currentUserName = '';
+    let participants = [];
 
-    // ICE Servers Configuration
-    const pcConfig = {
+    // WebRTC Configuration
+    const rtcConfig = {
       iceServers: [
         { urls: 'stun:stun.l.google.com:19302' },
         { urls: 'stun:stun1.l.google.com:19302' },
-        { urls: 'stun:stun2.l.google.com:19302' }
+        { urls: 'stun:stun2.l.google.com:19302' },
+        { urls: 'stun:stun3.l.google.com:19302' },
+        { urls: 'stun:stun4.l.google.com:19302' }
       ]
     };
 
-    // Initialize the app
-    init();
+    // Initialize
+    initialize();
 
-    function init() {
+    function initialize() {
       setupEventListeners();
-      checkPermissions();
+      checkMediaPermissions();
+      roomModal.show();
     }
 
     function setupEventListeners() {
-      // Control buttons
       muteBtn.addEventListener('click', toggleMute);
-      endCallBtn.addEventListener('click', endCall);
       videoBtn.addEventListener('click', toggleVideo);
       screenBtn.addEventListener('click', toggleScreenShare);
-      
-      // Room buttons
+      endCallBtn.addEventListener('click', endCall);
       createBtn.addEventListener('click', () => startCall(true));
       joinBtn.addEventListener('click', () => startCall(false));
-      
-      // Before unload cleanup
+      infoBtn.addEventListener('click', () => showToast('HoloCall v1.0 - Futuristic Video Conferencing'));
       window.addEventListener('beforeunload', cleanup);
     }
 
-    async function checkPermissions() {
+    async function checkMediaPermissions() {
       try {
-        // Check if we already have permissions
-        const devices = await navigator.mediaDevices.enumerateDevices();
-        const hasVideoPermission = devices.some(device => device.kind === 'videoinput' && device.label);
-        const hasAudioPermission = devices.some(device => device.kind === 'audioinput' && device.label);
-        
-        if (!hasVideoPermission || !hasAudioPermission) {
-          showToast('Please allow camera and microphone access');
-        }
-      } catch (error) {
-        console.error('Error checking permissions:', error);
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        stream.getTracks().forEach(track => track.stop());
+      } catch (err) {
+        showToast('Camera and microphone access required');
+        console.error('Permission error:', err);
       }
     }
 
     async function startCall(isCreator) {
-      currentUserName = nameInput.value.trim();
+      const name = nameInput.value.trim();
       const roomId = roomInput.value.trim();
-      
-      if (!currentUserName) {
+
+      if (!name) {
         showToast('Please enter your name');
         return;
       }
-      
       if (!roomId) {
         showToast('Please enter a room ID');
         return;
       }
-      
+
+      currentUserName = name;
       currentRoomId = roomId;
-      userNameDisplay.textContent = currentUserName;
+      userNameDisplay.textContent = name;
       roomModal.hide();
-      
+      loader.classList.add('active');
+
       try {
-        // Get user media with HD quality
         localStream = await navigator.mediaDevices.getUserMedia({
           video: {
-            width: { ideal: 1280 },
-            height: { ideal: 720 },
-            frameRate: { ideal: 30 }
+            width: { ideal: 1920 },
+            height: { ideal: 1080 },
+            frameRate: { ideal: 60 }
           },
           audio: {
             echoCancellation: true,
@@ -427,125 +601,114 @@
             autoGainControl: true
           }
         });
-        
+
         localVideo.srcObject = localStream;
-        updateStatus(isCreator ? 'Creating room...' : 'Joining room...', 'status-connecting');
-        
-        // Create peer connection
-        peerConnection = new RTCPeerConnection(pcConfig);
-        
-        // Add local stream tracks
-        localStream.getTracks().forEach(track => {
-          peerConnection.addTrack(track, localStream);
-        });
-        
-        // Remote stream handler
-        peerConnection.ontrack = event => {
-          if (!remoteVideo.srcObject) {
-            remoteVideo.srcObject = event.streams[0];
-            updateStatus('In call', 'status-active');
-            showToast('Call connected');
-          }
+        updateStatus(isCreator ? 'Initializing room...' : 'Joining room...', 'status-connecting');
+
+        peerConnection = new RTCPeerConnection(rtcConfig);
+
+        localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+        peerConnection.ontrack = ({ streams }) => {
+          remoteVideo.srcObject = streams[0];
+          updateStatus('Connected', 'status-active');
+          showToast('HoloCall established');
+          loader.classList.remove('active');
         };
-        
-        // ICE candidate handler
+
         peerConnection.onicecandidate = event => {
           if (event.candidate) {
-            database.ref(`calls/${roomId}/ice`).push(JSON.stringify(event.candidate));
+            db.ref(`holocalls/${roomId}/ice`).push(event.candidate.toJSON());
           }
         };
-        
-        // ICE connection state handler
+
         peerConnection.oniceconnectionstatechange = () => {
           if (peerConnection.iceConnectionState === 'disconnected') {
             updateStatus('Disconnected', 'status-error');
             showToast('Connection lost');
+            loader.classList.remove('active');
           }
         };
-        
-        const roomRef = database.ref(`calls/${roomId}`);
-        
+
+        const roomRef = db.ref(`holocalls/${roomId}`);
+
+        await roomRef.child('participants').push(name);
+        roomRef.child('participants').on('value', snapshot => {
+          if (snapshot.exists()) {
+            participants = Object.values(snapshot.val()).filter(p => p !== name);
+            updateParticipantsDisplay();
+          }
+        });
+
         if (isCreator) {
-          // Create offer
-          const offer = await peerConnection.createOffer({
-            offerToReceiveAudio: true,
-            offerToReceiveVideo: true
-          });
-          
+          const offer = await peerConnection.createOffer();
           await peerConnection.setLocalDescription(offer);
-          
-          // Save offer to database
-          await roomRef.child('offer').set(JSON.stringify(offer));
-          
-          // Listen for answer
-          roomRef.child('answer').on('value', async snap => {
-            if (snap.exists()) {
-              const answer = JSON.parse(snap.val());
-              await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+          await roomRef.child('offer').set(offer);
+
+          roomRef.child('answer').on('value', async snapshot => {
+            if (snapshot.exists() && peerConnection.signalingState !== 'stable') {
+              const answer = snapshot.val();
+              await peerConnection.setRemoteDescription(answer);
             }
           });
-          
-          // Cleanup after 1 hour
+
           setTimeout(() => roomRef.remove(), 3600000);
         } else {
-          // Get offer from database
-          const offerSnap = await roomRef.child('offer').get();
-          if (!offerSnap.exists()) {
+          const offerSnapshot = await roomRef.child('offer').get();
+          if (!offerSnapshot.exists()) {
             updateStatus('Room not found', 'status-error');
-            showToast('Room not found');
+            showToast('Room does not exist');
+            loader.classList.remove('active');
             return;
           }
-          
-          const offer = JSON.parse(offerSnap.val());
-          await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
-          
-          // Create answer
+
+          const offer = offerSnapshot.val();
+          await peerConnection.setRemoteDescription(offer);
+
           const answer = await peerConnection.createAnswer();
           await peerConnection.setLocalDescription(answer);
-          
-          // Save answer to database
-          await roomRef.child('answer').set(JSON.stringify(answer));
+          await roomRef.child('answer').set(answer);
         }
-        
-        // Listen for ICE candidates
-        roomRef.child('ice').on('child_added', snap => {
-          const candidate = JSON.parse(snap.val());
-          peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+
+        roomRef.child('ice').on('child_added', async snapshot => {
+          const candidate = snapshot.val();
+          await peerConnection.addIceCandidate(candidate);
         });
-        
-      } catch (error) {
-        console.error('Call setup error:', error);
+
+      } catch (err) {
+        console.error('Setup error:', err);
         updateStatus('Error', 'status-error');
-        showToast('Error setting up call: ' + error.message);
+        showToast(`Failed to initialize: ${err.message}`);
         cleanup();
+        loader.classList.remove('active');
       }
     }
 
     function toggleMute() {
       if (!localStream) return;
-      
       isMuted = !isMuted;
-      localStream.getAudioTracks()[0].enabled = !isMuted;
-      muteBtn.innerHTML = isMuted ? '<i class="bi bi-mic-mute-fill"></i>' : '<i class="bi bi-mic-fill"></i>';
-      muteBtn.title = isMuted ? 'Unmute' : 'Mute';
+      localStream.getAudioTracks().forEach(track => track.enabled = !isMuted);
+      muteBtn.innerHTML = `<i class="bi ${isMuted ? 'bi-mic-mute-fill' : 'bi-mic-fill'}"></i>`;
+      muteBtn.classList.toggle('active', isMuted);
+      muteBtn.title = isMuted ? 'Unmute Microphone' : 'Mute Microphone';
       showToast(isMuted ? 'Microphone muted' : 'Microphone unmuted');
     }
 
     function toggleVideo() {
       if (!localStream) return;
-      
       isVideoOff = !isVideoOff;
-      localStream.getVideoTracks()[0].enabled = !isVideoOff;
-      videoBtn.innerHTML = isVideoOff ? '<i class="bi bi-camera-video-off-fill"></i>' : '<i class="bi bi-camera-video-fill"></i>';
-      videoBtn.title = isVideoOff ? 'Turn On Video' : 'Turn Off Video';
-      showToast(isVideoOff ? 'Video turned off' : 'Video turned on');
+      localStream.getVideoTracks().forEach(track => track.enabled = !isVideoOff);
+      videoBtn.innerHTML = `<i class="bi ${isVideoOff ? 'bi-camera-video-off-fill' : 'bi-camera-video-fill'}"></i>`;
+      videoBtn.classList.toggle('active', isVideoOff);
+      videoBtn.title = isVideoOff ? 'Enable Video' : 'Disable Video';
+      showToast(isVideoOff ? 'Video disabled' : 'Video enabled');
     }
 
     async function toggleScreenShare() {
       if (isScreenSharing) {
-        await stopScreenShare();
+        stopScreenShare();
       } else {
-        await startScreenShare();
+        startScreenShare();
       }
     }
 
@@ -556,55 +719,47 @@
             width: { ideal: 1920 },
             height: { ideal: 1080 },
             frameRate: { ideal: 30 }
-          },
-          audio: false
+          }
         });
-        
-        // Replace video track in peer connection
+
         const videoTrack = screenStream.getVideoTracks()[0];
-        const sender = peerConnection.getSenders().find(s => s.track.kind === 'video');
-        
+        const sender = peerConnection.getSenders().find(s => s.track?.kind === 'video');
+
         if (sender) {
           await sender.replaceTrack(videoTrack);
         }
-        
-        // Show screen in local video
+
         localVideo.srcObject = screenStream;
-        
         isScreenSharing = true;
-        screenBtn.innerHTML = '<i class="bi bi-stop-fill"></i>';
-        screenBtn.title = 'Stop Sharing';
-        showToast('Screen sharing started');
-        
-        // Handle when user stops sharing
+        screenBtn.innerHTML = '<i class="bi bi-stop-circle-fill"></i>';
+        screenBtn.classList.add('active');
+        screenBtn.title = 'Stop Screen Share';
+        showToast('Screen sharing activated');
+
         videoTrack.onended = stopScreenShare;
-        
-      } catch (error) {
-        console.error('Screen share error:', error);
-        showToast('Screen sharing failed');
+      } catch (err) {
+        console.error('Screen share error:', err);
+        showToast('Failed to share screen');
       }
     }
 
     async function stopScreenShare() {
       if (!screenStream || !localStream) return;
-      
-      // Replace with camera track
+
       const videoTrack = localStream.getVideoTracks()[0];
-      const sender = peerConnection.getSenders().find(s => s.track.kind === 'video');
-      
+      const sender = peerConnection.getSenders().find(s => s.track?.kind === 'video');
+
       if (sender) {
         await sender.replaceTrack(videoTrack);
       }
-      
-      // Stop screen tracks
+
       screenStream.getTracks().forEach(track => track.stop());
       screenStream = null;
-      
-      // Show camera in local video
       localVideo.srcObject = localStream;
-      
+
       isScreenSharing = false;
-      screenBtn.innerHTML = '<i class="bi bi-laptop"></i>';
+      screenBtn.innerHTML = '<i class="bi bi-display-fill"></i>';
+      screenBtn.classList.remove('active');
       screenBtn.title = 'Share Screen';
       showToast('Screen sharing stopped');
     }
@@ -612,41 +767,47 @@
     function endCall() {
       if (peerConnection) {
         peerConnection.close();
+        peerConnection = null;
       }
-      
+
       if (currentRoomId) {
-        database.ref(`calls/${currentRoomId}`).off();
-        database.ref(`calls/${currentRoomId}`).remove();
+        db.ref(`holocalls/${currentRoomId}`).off();
+        db.ref(`holocalls/${currentRoomId}`).remove();
       }
-      
+
       if (localStream) {
         localStream.getTracks().forEach(track => track.stop());
         localStream = null;
       }
-      
+
       if (screenStream) {
         screenStream.getTracks().forEach(track => track.stop());
         screenStream = null;
       }
-      
+
       remoteVideo.srcObject = null;
       localVideo.srcObject = null;
-      
+
       updateStatus('Idle', 'status-idle');
+      participants = [];
       currentRoomId = '';
       isMuted = false;
       isVideoOff = false;
       isScreenSharing = false;
-      
-      // Reset buttons
+
       muteBtn.innerHTML = '<i class="bi bi-mic-fill"></i>';
-      muteBtn.title = 'Mute';
+      muteBtn.classList.remove('active');
+      muteBtn.title = 'Mute Microphone';
       videoBtn.innerHTML = '<i class="bi bi-camera-video-fill"></i>';
-      videoBtn.title = 'Turn Off Video';
-      screenBtn.innerHTML = '<i class="bi bi-laptop"></i>';
+      videoBtn.classList.remove('active');
+      videoBtn.title = 'Disable Video';
+      screenBtn.innerHTML = '<i class="bi bi-display-fill"></i>';
+      screenBtn.classList.remove('active');
       screenBtn.title = 'Share Screen';
-      
-      showToast('Call ended');
+
+      updateParticipantsDisplay();
+      showToast('HoloCall terminated');
+      roomModal.show();
     }
 
     function cleanup() {
@@ -655,26 +816,22 @@
 
     function updateStatus(text, statusClass) {
       statusText.textContent = text;
-      
-      // Remove all status classes
-      statusDot.classList.remove(
-        'status-idle', 'status-connecting', 'status-active', 'status-error'
-      );
-      
-      // Add new status class
+      statusDot.className = 'status-dot';
       if (statusClass) {
         statusDot.classList.add(statusClass);
       }
     }
 
+    function updateParticipantsDisplay() {
+      participantsDisplay.textContent = participants.length > 0
+        ? `Connected: ${participants.join(', ')}`
+        : 'Awaiting connections...';
+    }
+
     function showToast(message) {
       toastMessage.textContent = message;
       toast.show();
-      
-      // Auto hide after 3 seconds
-      setTimeout(() => {
-        toast.hide();
-      }, 3000);
+      setTimeout(() => toast.hide(), 3500);
     }
   </script>
 </body>

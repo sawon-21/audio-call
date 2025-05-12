@@ -1,104 +1,143 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Smart Call</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
   <style>
-    body {
+    body, html {
+      height: 100%;
       margin: 0;
-      background-color: #ece5dd;
+      background-color: #000;
+      overflow: hidden;
       font-family: 'Segoe UI', sans-serif;
     }
-    .chat-container {
-      display: flex;
-      flex-direction: column;
+
+    .video-call-wrapper {
+      position: relative;
       height: 100vh;
+      width: 100vw;
+      background-color: #000;
     }
-    .chat-header {
-      background-color: #075e54;
-      color: white;
-      padding: 1rem;
-      font-size: 1.25rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+
+    #remoteVideo {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
+      background-color: #000;
     }
-    .chat-main {
-      flex-grow: 1;
-      padding: 1rem;
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      background-color: #e5ddd5;
-    }
-    .chat-footer {
-      background-color: #fff;
-      padding: 1rem;
-      border-top: 1px solid #ddd;
-    }
-    .video-container {
-      display: flex;
-      gap: 1rem;
-      justify-content: center;
-    }
-    video {
-      width: 48%;
+
+    #localVideo {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      width: 120px;
+      height: 160px;
       border-radius: 10px;
-      background: black;
+      z-index: 2;
+      object-fit: cover;
+      border: 2px solid #fff;
     }
-    .status, #timer {
+
+    .call-info {
+      position: absolute;
+      bottom: 120px;
+      width: 100%;
+      color: white;
       text-align: center;
-      font-weight: bold;
+      z-index: 3;
     }
-    .btn-group {
+
+    .call-info h4 {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+
+    .call-info p {
+      margin: 0;
+      font-size: 1rem;
+      opacity: 0.8;
+    }
+
+    .call-controls {
+      position: absolute;
+      bottom: 30px;
+      width: 100%;
+      text-align: center;
+      z-index: 4;
+    }
+
+    .call-controls button {
+      margin: 0 10px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      border: none;
+      font-size: 1.2rem;
+      color: white;
+      background-color: rgba(0, 0, 0, 0.4);
+    }
+
+    .call-controls .btn-danger {
+      background-color: red !important;
+    }
+
+    .room-entry {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 5;
       display: flex;
       gap: 0.5rem;
-      justify-content: center;
-      flex-wrap: wrap;
     }
-    .footer-note {
-      font-size: 0.75rem;
-      text-align: center;
-      margin-top: 0.5rem;
-      color: #999;
+
+    .room-entry input {
+      border-radius: 10px;
+      padding: 6px 12px;
+    }
+
+    .room-entry button {
+      border-radius: 10px;
     }
   </style>
 </head>
 <body>
-  <div class="chat-container">
-    <div class="chat-header">
-      <span>Smart Call</span>
-      <span id="timer">Idle</span>
-    </div><div class="chat-main">
-  <input type="text" id="room-id" class="form-control" placeholder="Enter Room ID (Create or Join)" />
 
-  <div class="btn-group">
+<div class="video-call-wrapper">
+  <video id="remoteVideo" autoplay playsinline></video>
+  <video id="localVideo" autoplay muted playsinline></video>
+
+  <div class="room-entry">
+    <input type="text" id="room-id" placeholder="Room ID" class="form-control"/>
     <button id="create-btn" class="btn btn-success">Create</button>
     <button id="join-btn" class="btn btn-primary">Join</button>
-    <button id="mute-btn" class="btn btn-outline-dark">Mute</button>
-    <button id="video-btn" class="btn btn-outline-dark">Hide Video</button>
-    <button id="leave-btn" class="btn btn-danger">Leave</button>
   </div>
 
-  <div class="video-container">
-    <video id="localVideo" autoplay muted playsinline></video>
-    <video id="remoteVideo" autoplay playsinline></video>
+  <div class="call-info">
+    <h4>Mehedi Al Hasan Sawon</h4>
+    <p id="call-status">Idle</p>
   </div>
 
-  <div id="call-status" class="status">Status: Idle</div>
+  <div class="call-controls">
+    <button id="mute-btn">Mic</button>
+    <button id="leave-btn" class="btn-danger">End</button>
+    <button id="video-btn">Cam</button>
+  </div>
 </div>
 
-<div class="chat-footer">
-  <div class="footer-note">End-to-end encrypted call via Firebase + WebRTC</div>
-</div>
-
-  </div><script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script><script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+<script>
   const firebaseConfig = {
     apiKey: "AIzaSyB4CQ3uiTxrvmbbXM01vcB_LjeW7Lk6ogI",
     authDomain: "adui-3ee05.firebaseapp.com",
     projectId: "adui-3ee05",
-    storageBucket: "adui-3ee05.firebasestorage.app",
+    storageBucket: "adui-3ee05.appspot.com",
     messagingSenderId: "766920897994",
     appId: "1:766920897994:web:0cea7f8c206455749bcb33",
     databaseURL: "https://adui-3ee05-default-rtdb.firebaseio.com/"
@@ -113,11 +152,8 @@
   const muteBtn = document.getElementById("mute-btn");
   const leaveBtn = document.getElementById("leave-btn");
   const videoBtn = document.getElementById("video-btn");
-  const timerEl = document.getElementById("timer");
   let isMuted = false;
   let isVideoHidden = false;
-  let startTime;
-  let timerInterval;
 
   document.getElementById("create-btn").onclick = () => handleCall(true);
   document.getElementById("join-btn").onclick = () => handleCall(false);
@@ -126,18 +162,17 @@
     if (!localStream) return;
     isMuted = !isMuted;
     localStream.getAudioTracks()[0].enabled = !isMuted;
-    muteBtn.innerText = isMuted ? "Unmute" : "Mute";
+    muteBtn.innerText = isMuted ? "Unmute" : "Mic";
   };
 
   videoBtn.onclick = () => {
     if (!localStream) return;
     isVideoHidden = !isVideoHidden;
     localStream.getVideoTracks()[0].enabled = !isVideoHidden;
-    videoBtn.innerText = isVideoHidden ? "Show Video" : "Hide Video";
+    videoBtn.innerText = isVideoHidden ? "Show" : "Cam";
   };
 
   leaveBtn.onclick = () => {
-    clearInterval(timerInterval);
     if (peerConnection) peerConnection.close();
     window.location.reload();
   };
@@ -148,7 +183,6 @@
 
     statusText.innerText = isCreator ? "Creating Room..." : "Joining Room...";
     localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
-
     document.getElementById("localVideo").srcObject = localStream;
 
     peerConnection = new RTCPeerConnection(config);
@@ -159,7 +193,6 @@
       if (!remoteVideo.srcObject) {
         remoteVideo.srcObject = event.streams[0];
         statusText.innerText = "In Call";
-        startCallTimer();
       }
     };
 
@@ -203,15 +236,7 @@
       peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
     });
   }
+</script>
 
-  function startCallTimer() {
-    startTime = Date.now();
-    timerInterval = setInterval(() => {
-      const elapsed = Date.now() - startTime;
-      const minutes = Math.floor(elapsed / 60000);
-      const seconds = Math.floor((elapsed % 60000) / 1000);
-      timerEl.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-    }, 1000);
-  }
-</script></body>
+</body>
 </html>

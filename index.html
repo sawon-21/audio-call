@@ -2,537 +2,165 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VoiceConnect Pro</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Audio Call with Admin</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
-  <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css" />
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
     body {
-      font-family: 'Inter', sans-serif;
-      background: linear-gradient(135deg, #0f172a, #1e293b);
-      min-height: 100vh;
-      color: #e2e8f0;
-    }
-    .navbar {
-      background: rgba(15, 23, 42, 0.85);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 1rem 0;
-    }
-    .navbar-card {
-      background: rgba(30, 41, 59, 0.9);
-      border-radius: 12px;
-      padding: 0.5rem 1rem;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-    }
-    .call-card {
-      background: rgba(30, 41, 59, 0.85);
-      backdrop-filter: blur(15px);
-      border-radius: 20px;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-      transition: transform 0.3s ease;
-      max-width: 900px;
-    }
-    .call-card:hover {
-      transform: translateY(-8px);
-    }
-    .history-item {
-      background: rgba(30, 41, 59, 0.7);
-      border-radius: 12px;
-      transition: all 0.3s ease;
-    }
-    .history-item:hover {
-      background: rgba(30, 41, 59, 0.9);
-      transform: scale(1.03);
-    }
-    .pulse-animation {
-      animation: pulse 1.8s infinite;
-    }
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.06); }
-      100% { transform: scale(1); }
-    }
-    .video-container {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 16/9;
-      border-radius: 15px;
-      overflow: hidden;
-      background: #000;
-      border: 2px solid rgba(255, 255, 255, 0.15);
-      max-height: 506px; /* Adjusted for 900px width at 16:9 */
-    }
-    .local-video {
-      position: absolute;
-      bottom: 20px;
-      right: 20px;
-      width: 220px;
-      border-radius: 12px;
-      border: 3px solid #3b82f6;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-    }
-    .remote-video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .audio-visualizer {
-      width: 100%;
-      height: 120px;
-      border-radius: 12px;
-      background: rgba(0, 0, 0, 0.3);
-    }
-    .status-indicator {
+      background: #0b1e2d;
+      color: white;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 10px;
+      justify-content: center;
+      height: 100vh;
     }
-    .status-dot {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      transition: background-color 0.3s ease;
+    .call-box {
+      background: #1f2a3a;
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      text-align: center;
     }
-    .control-btn {
-      transition: all 0.2s ease;
-    }
-    .control-btn:hover {
-      transform: scale(1.1);
-    }
-    .logo-img {
-      width: 40px;
-      height: 40px;
-      border-radius: 8px;
+    video, audio {
+      display: none;
     }
   </style>
 </head>
 <body>
-  <nav class="navbar navbar-expand-lg">
-    <div class="container-fluid max-w-7xl navbar-card">
-      <a class="navbar-brand text-white fw-bold fs-4 d-flex align-items-center" href="#">
-        <img src="https://via.placeholder.com/40?text=VC" alt="Logo" class="logo-img me-2" />
-        <span><i class="fas fa-video me-2"></i>VoiceConnect Pro</span>
-      </a>
-      <div class="d-flex align-items-center">
-        <div class="status-indicator me-4">
-          <span class="status-dot" id="statusDot"></span>
-          <span id="callStatus" class="text-sm">Idle</span>
-          <span id="callQuality" class="text-sm d-none"> | Quality: N/A</span>
-        </div>
-        <img src="https://via.placeholder.com/40" alt="Profile" class="rounded-circle cursor-pointer" id="profileIcon" data-bs-toggle="modal" data-bs-target="#profileModal" />
-      </div>
-    </div>
-  </nav>
 
-  <div class="container">
-    <div class="call-card p-5 mx-auto mt-5" data-aos="fade-up">
-      <h3 class="text-center mb-4">
-        <i class="fas fa-user-friends me-2"></i>Call Mehedi Al Hasan Sawon
-      </h3>
-      <div class="video-container mb-4 d-none" id="videoContainer">
-        <video id="remoteVideo" class="remote-video" autoplay playsinline></video>
-        <video id="localVideo" class="local-video" autoplay playsinline muted></video>
-      </div>
-      <canvas id="audioVisualizer" class="audio-visualizer mb-4 d-none"></canvas>
-      <div class="d-flex justify-content-center gap-3 mb-3">
-        <button id="startCallBtn" class="btn btn-primary pulse-animation control-btn">
-          <i class="fas fa-phone me-2"></i>Start Audio Call
-        </button>
-        <button id="startVideoCallBtn" class="btn btn-success pulse-animation control-btn">
-          <i class="fas fa-video me-2"></i>Start Video Call
-        </button>
-        <button id="endCallBtn" class="btn btn-danger control-btn" disabled>
-          <i class="fas fa-phone-slash me-2"></i>End Call
-        </button>
-      </div>
-      <div class="d-flex justify-content-center gap-3">
-        <button id="toggleAudioBtn" class="btn btn-outline-light control-btn d-none">
-          <i class="fas fa-microphone me-2"></i>Mute Audio
-        </button>
-        <button id="toggleVideoBtn" class="btn btn-outline-light control-btn d-none">
-          <i class="fas fa-video me-2"></i>Disable Video
-        </button>
-      </div>
-    </div>
+<div class="call-box" id="callBox" style="display:none;">
+  <h3>Calling Admin: Mehedi Al Hasan Sawon</h3>
+  <button class="btn btn-danger mt-3" onclick="endCall()">End Call</button>
+</div>
 
-    <div class="mt-5 mx-auto" style="max-width: 900px;" data-aos="fade-up" data-aos-delay="100">
-      <h4 class="fw-semibold">
-        <i class="fas fa-history me-2"></i>Call History
-      </h4>
-      <ul id="callHistoryList" class="list-unstyled mt-3"></ul>
-    </div>
+<div id="loginBox">
+  <h2>Welcome to Audio Call</h2>
+  <button class="btn btn-primary" onclick="login()">Continue with Google</button>
+</div>
+
+<!-- Modal for Name and Phone -->
+<div class="modal fade" id="infoModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <form id="infoForm" class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Your Info</h5>
+      </div>
+      <div class="modal-body">
+        <input type="text" class="form-control mb-2" placeholder="Your Name" id="nameInput" required />
+        <input type="text" class="form-control" placeholder="Phone Number" id="phoneInput" required />
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-success">Start Call</button>
+      </div>
+    </form>
   </div>
+</div>
 
-  <!-- Profile Modal -->
-  <div class="modal fade" id="profileModal" tabindex="-1" aria-labelledby="profileModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content bg-dark text-white border-0 rounded-3">
-        <div class="modal-header border-0">
-          <h5 class="modal-title" id="profileModalLabel">
-            <i class="fas fa-user-circle me-2"></i>Profile Information
-          </h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <p><strong>Name:</strong> <span id="profileName"></span></p>
-          <p><strong>Phone:</strong> <span id="profilePhone"></span></p>
-        </div>
-      </div>
-    </div>
-  </div>
+<!-- Audio elements -->
+<audio id="localAudio" autoplay muted></audio>
+<audio id="remoteAudio" autoplay></audio>
 
-  <!-- User Info Modal -->
-  <div class="modal fade" id="userInfoModal" tabindex="-1" aria-labelledby="userInfoModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <form id="userInfoForm" class="modal-content bg-dark text-white border-0 rounded-3">
-        <div class="modal-header border-0">
-          <h5 class="modal-title" id="userInfoModalLabel">
-            <i class="fas fa-user-edit me-2"></i>Enter Your Information
-          </h5>
-        </div>
-        <div class="modal-body">
-          <div class="mb-3">
-            <label for="userName" class="form-label">Name</label>
-            <input type="text" class="form-control bg-dark text-white border-secondary" id="userName" required />
-          </div>
-          <div class="mb-3">
-            <label for="userPhone" class="form-label">Phone</label>
-            <input type="text" class="form-control bg-dark text-white border-secondary" id="userPhone" required />
-          </div>
-        </div>
-        <div class="modal-footer border-0">
-          <button type="submit" class="btn btn-primary">
-            <i class="fas fa-save me-2"></i>Save
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyB4CQ3uiTxrvmbbXM01vcB_LjeW7Lk6ogI",
+    authDomain: "adui-3ee05.firebaseapp.com",
+    projectId: "adui-3ee05",
+    storageBucket: "adui-3ee05.appspot.com",
+    messagingSenderId: "766920897994",
+    appId: "1:766920897994:web:0cea7f8c206455749bcb33",
+    databaseURL: "https://adui-3ee05-default-rtdb.firebaseio.com/"
+  };
 
-  <audio id="localAudio" autoplay muted></audio>
-  <audio id="remoteAudio" autoplay></audio>
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.database();
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-  <script>
-    AOS.init({ duration: 800, once: true });
+  let user = null;
+  let localStream;
+  let peerConnection;
+  const servers = { iceServers: [{ urls: "stun:stun.l.google.com:19302" }] };
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyB4CQ3uiTxrvmbbXM01vcB_LjeW7Lk6ogI",
-      authDomain: "adui-3ee05.firebaseapp.com",
-      projectId: "adui-3ee05",
-      storageBucket: "adui-3ee05.appspot.com",
-      messagingSenderId: "766920897994",
-      appId: "1:766920897994:web:0cea7f8c206455749bcb33",
-      databaseURL: "https://adui-3ee05-default-rtdb.firebaseio.com/"
+  function login() {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider)
+      .then(result => {
+        user = result.user;
+        const userId = user.uid;
+        // Check if user has name/phone stored
+        db.ref('users/' + userId).once('value').then(snapshot => {
+          if (!snapshot.exists()) {
+            new bootstrap.Modal(document.getElementById('infoModal')).show();
+          } else {
+            startCall();
+          }
+        });
+      })
+      .catch(console.error);
+  }
+
+  document.getElementById('infoForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const name = document.getElementById('nameInput').value;
+    const phone = document.getElementById('phoneInput').value;
+    db.ref('users/' + user.uid).set({ name, phone }).then(() => {
+      bootstrap.Modal.getInstance(document.getElementById('infoModal')).hide();
+      startCall();
+    });
+  });
+
+  async function startCall() {
+    document.getElementById('loginBox').style.display = 'none';
+    document.getElementById('callBox').style.display = 'block';
+
+    localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    document.getElementById('localAudio').srcObject = localStream;
+
+    peerConnection = new RTCPeerConnection(servers);
+    localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+    peerConnection.ontrack = event => {
+      document.getElementById('remoteAudio').srcObject = event.streams[0];
     };
 
-    firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
-
-    const servers = {
-      iceServers: [
-        { urls: "stun:stun.l.google.com:19302" },
-        // Add TURN server credentials for production
-      ]
+    const callRef = db.ref('calls/' + user.uid);
+    peerConnection.onicecandidate = e => {
+      if (e.candidate) {
+        callRef.child('callerCandidates').push(JSON.stringify(e.candidate));
+      }
     };
 
-    let localStream = null;
-    let peerConnection = null;
-    let callRef = null;
-    let analyser = null;
-    let isVideoCall = false;
-    let isAudioMuted = false;
-    let isVideoMuted = false;
+    const offer = await peerConnection.createOffer();
+    await peerConnection.setLocalDescription(offer);
+    callRef.set({ offer });
 
-    const startCallBtn = document.getElementById('startCallBtn');
-    const startVideoCallBtn = document.getElementById('startVideoCallBtn');
-    const endCallBtn = document.getElementById('endCallBtn');
-    const toggleAudioBtn = document.getElementById('toggleAudioBtn');
-    const toggleVideoBtn = document.getElementById('toggleVideoBtn');
-    const profileName = document.getElementById('profileName');
-    const profilePhone = document.getElementById('profilePhone');
-    const callHistoryList = document.getElementById('callHistoryList');
-    const callStatus = document.getElementById('callStatus');
-    const callQuality = document.getElementById('callQuality');
-    const statusDot = document.getElementById('statusDot');
-    const audioVisualizer = document.getElementById('audioVisualizer');
-    const videoContainer = document.getElementById('videoContainer');
-    const localVideo = document.getElementById('localVideo');
-    const remoteVideo = document.getElementById('remoteVideo');
-
-    window.addEventListener('load', () => {
-      const storedName = localStorage.getItem('userName');
-      const storedPhone = localStorage.getItem('userPhone');
-      if (storedName && storedPhone) {
-        profileName.textContent = storedName;
-        profilePhone.textContent = storedPhone;
-      } else {
-        new bootstrap.Modal(document.getElementById('userInfoModal')).show();
+    // Listen for answer
+    callRef.on('value', async snapshot => {
+      const data = snapshot.val();
+      if (data?.answer && !peerConnection.currentRemoteDescription) {
+        const answer = new RTCSessionDescription(data.answer);
+        await peerConnection.setRemoteDescription(answer);
       }
-      loadCallHistory();
     });
 
-    document.getElementById('userInfoForm').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const name = document.getElementById('userName').value;
-      const phone = document.getElementById('userPhone').value;
-      if (!name || !phone) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Invalid Input',
-          text: 'Please fill in both name and phone fields.',
-          background: '#1e293b',
-          color: '#e2e8f0',
-          confirmButtonColor: '#3b82f6'
-        });
-        return;
-      }
-      localStorage.setItem('userName', name);
-      localStorage.setItem('userPhone', phone);
-      profileName.textContent = name;
-      profilePhone.textContent = phone;
-      bootstrap.Modal.getInstance(document.getElementById('userInfoModal')).hide();
-      Swal.fire({
-        icon: 'success',
-        title: 'Profile Saved',
-        text: 'Your information has been saved successfully!',
-        background: '#1e293b',
-        color: '#e2e8f0',
-        confirmButtonColor: '#3b82f6',
-        timer: 1500
-      });
+    // Listen for ICE from admin
+    db.ref('calls/' + user.uid + '/calleeCandidates').on('child_added', snapshot => {
+      const candidate = new RTCIceCandidate(JSON.parse(snapshot.val()));
+      peerConnection.addIceCandidate(candidate);
     });
+  }
 
-    async function startCall(videoEnabled = false) {
-      try {
-        isVideoCall = videoEnabled;
-        startCallBtn.disabled = true;
-        startVideoCallBtn.disabled = true;
-        endCallBtn.disabled = false;
-        toggleAudioBtn.classList.remove('d-none');
-        if (videoEnabled) toggleVideoBtn.classList.remove('d-none');
-        callStatus.textContent = 'Connecting...';
-        statusDot.style.backgroundColor = '#facc15';
-        audioVisualizer.classList.remove('d-none');
-        if (videoEnabled) videoContainer.classList.remove('d-none');
+  function endCall() {
+    peerConnection?.close();
+    db.ref('calls/' + user.uid).remove();
+    alert('Call ended');
+    window.location.reload();
+  }
+</script>
 
-        localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: videoEnabled });
-        document.getElementById('localAudio').srcObject = localStream;
-        if (videoEnabled) localVideo.srcObject = localStream;
-
-        peerConnection = new RTCPeerConnection(servers);
-        localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
-
-        peerConnection.ontrack = (event) => {
-          document.getElementById('remoteAudio').srcObject = event.streams[0];
-          if (videoEnabled) remoteVideo.srcObject = event.streams[0];
-          callStatus.textContent = 'Connected';
-          statusDot.style.backgroundColor = '#22c55e';
-          callQuality.classList.remove('d-none');
-          setupAudioVisualizer();
-          monitorCallQuality();
-          Swal.fire({
-            icon: 'success',
-            title: 'Call Connected',
-            text: `${videoEnabled ? 'Video' : 'Audio'} call started successfully!`,
-            background: '#1e293b',
-            color: '#e2e8f0',
-            confirmButtonColor: '#3b82f6',
-            timer: 1500
-          });
-        };
-
-        peerConnection.oniceconnectionstatechange = () => {
-          const state = peerConnection.iceConnectionState;
-          callStatus.textContent = state.charAt(0).toUpperCase() + state.slice(1);
-          statusDot.style.backgroundColor = state === 'connected' ? '#22c55e' : state === 'disconnected' ? '#ef4444' : '#facc15';
-          if (state === 'disconnected') {
-            endCall();
-            Swal.fire({
-              icon: 'warning',
-              title: 'Call Disconnected',
-              text: 'The call has been disconnected.',
-              background: '#1e293b',
-              color: '#e2e8f0',
-              confirmButtonColor: '#3b82f6'
-            });
-          }
-        };
-
-        callRef = database.ref('calls/' + Date.now());
-        peerConnection.onicecandidate = (event) => {
-          if (event.candidate) {
-            callRef.child('callerCandidates').push(JSON.stringify(event.candidate));
-          }
-        };
-
-        const offer = await peerConnection.createOffer();
-        await peerConnection.setLocalDescription(offer);
-        await callRef.set({ offer, isVideoCall });
-
-        callRef.on('value', async (snapshot) => {
-          const data = snapshot.val();
-          if (data && data.answer && !peerConnection.currentRemoteDescription) {
-            await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
-          }
-        });
-
-        callRef.child('calleeCandidates').on('child_added', (snapshot) => {
-          peerConnection.addIceCandidate(new RTCIceCandidate(JSON.parse(snapshot.val())));
-        });
-
-        const callHistory = JSON.parse(localStorage.getItem('callHistory')) || [];
-        callHistory.push({ date: new Date().toLocaleString('en-US', { timeZone: 'Asia/Dhaka' }), status: 'Initiated', type: videoEnabled ? 'Video' : 'Audio' });
-        localStorage.setItem('callHistory', JSON.stringify(callHistory));
-        loadCallHistory();
-      } catch (error) {
-        console.error('Error starting call:', error);
-        callStatus.textContent = 'Error: Failed to start call';
-        statusDot.style.backgroundColor = '#ef4444';
-        startCallBtn.disabled = false;
-        startVideoCallBtn.disabled = false;
-        endCallBtn.disabled = true;
-        audioVisualizer.classList.add('d-none');
-        videoContainer.classList.add('d-none');
-        Swal.fire({
-          icon: 'error',
-          title: 'Call Failed',
-          text: 'Failed to start the call. Please check your camera/microphone permissions.',
-          background: '#1e293b',
-          color: '#e2e8f0',
-          confirmButtonColor: '#3b82f6'
-        });
-      }
-    }
-
-    startCallBtn.addEventListener('click', () => startCall(false));
-    startVideoCallBtn.addEventListener('click', () => startCall(true));
-
-    endCallBtn.addEventListener('click', () => {
-      endCall();
-      Swal.fire({
-        icon: 'info',
-        title: 'Call Ended',
-        text: 'The call has been ended.',
-        background: '#1e293b',
-        color: '#e2e8f0',
-        confirmButtonColor: '#3b82f6',
-        timer: 1500
-      });
-    });
-
-    toggleAudioBtn.addEventListener('click', () => {
-      isAudioMuted = !isAudioMuted;
-      localStream.getAudioTracks().forEach(track => (track.enabled = !isAudioMuted));
-      toggleAudioBtn.innerHTML = `<i class="fas fa-microphone${isAudioMuted ? '-slash' : ''} me-2"></i>${isAudioMuted ? 'Unmute' : 'Mute'} Audio`;
-    });
-
-    toggleVideoBtn.addEventListener('click', () => {
-      isVideoMuted = !isVideoMuted;
-      localStream.getVideoTracks().forEach(track => (track.enabled = !isVideoMuted));
-      toggleVideoBtn.innerHTML = `<i class="fas fa-video${isVideoMuted ? '-slash' : ''} me-2"></i>${isVideoMuted ? 'Enable' : 'Disable'} Video`;
-    });
-
-    function endCall() {
-      if (peerConnection) peerConnection.close();
-      if (localStream) localStream.getTracks().forEach(track => track.stop());
-      if (callRef) callRef.off();
-      startCallBtn.disabled = false;
-      startVideoCallBtn.disabled = false;
-      endCallBtn.disabled = true;
-      toggleAudioBtn.classList.add('d-none');
-      toggleVideoBtn.classList.add('d-none');
-      callStatus.textContent = 'Idle';
-      statusDot.style.backgroundColor = '#6b7280';
-      callQuality.classList.add('d-none');
-      audioVisualizer.classList.add('d-none');
-      videoContainer.classList.add('d-none');
-      isAudioMuted = false;
-      isVideoMuted = false;
-      const callHistory = JSON.parse(localStorage.getItem('callHistory')) || [];
-      callHistory[callHistory.length - 1].status = 'Ended';
-      localStorage.setItem('callHistory', JSON.stringify(callHistory));
-      loadCallHistory();
-    }
-
-    function setupAudioVisualizer() {
-      const audioContext = new AudioContext();
-      analyser = audioContext.createAnalyser();
-      const source = audioContext.createMediaStreamSource(localStream);
-      source.connect(analyser);
-      analyser.fftSize = 256;
-      const bufferLength = analyser.frequencyBinCount;
-      const dataArray = new Uint8Array(bufferLength);
-      const canvas = audioVisualizer;
-      const ctx = canvas.getContext('2d');
-      canvas.width = 600;
-      canvas.height = 120;
-
-      function draw() {
-        requestAnimationFrame(draw);
-        analyser.getByteFrequencyData(dataArray);
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        const barWidth = canvas.width / bufferLength;
-        let x = 0;
-        for (let i = 0; i < bufferLength; i++) {
-          const barHeight = dataArray[i] / 2;
-          ctx.fillStyle = `hsl(${i * 2}, 70%, 50%)`;
-          ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
-          x += barWidth + 1;
-        }
-      }
-      draw();
-    }
-
-    function monitorCallQuality() {
-      let lastBytesReceived = 0;
-      const interval = setInterval(async () => {
-        if (peerConnection && callStatus.textContent === 'Connected') {
-          const stats = await peerConnection.getStats();
-          let quality = 'Excellent';
-          stats.forEach(report => {
-            if (report.type === 'inbound-rtp') {
-              const bytesReceived = report.bytesReceived;
-              const packetsLost = report.packetsLost;
-              const bitrate = (bytesReceived - lastBytesReceived) * 8 / 1000;
-              lastBytesReceived = bytesReceived;
-              if (packetsLost > 0 || bitrate < 50) quality = 'Poor';
-              else if (bitrate < 100) quality = 'Fair';
-            }
-          });
-          callQuality.textContent = ` | Quality: ${quality}`;
-          callQuality.className = `text-sm ${quality === 'Poor' ? 'text-danger' : quality === 'Fair' ? 'text-warning' : 'text-success'}`;
-        } else {
-          clearInterval(interval);
-        }
-      }, 2000);
-    }
-
-    function loadCallHistory() {
-      const history = JSON.parse(localStorage.getItem('callHistory')) || [];
-      callHistoryList.innerHTML = '';
-      history.reverse().forEach((entry, index) => {
-        const li = document.createElement('li');
-        li.className = 'history-item p-3 d-flex justify-content-between align-items-center animate__animated animate__fadeIn';
-        li.setAttribute('data-aos', 'fade-up');
-        li.setAttribute('data-aos-delay', index * 100);
-        li.innerHTML = `
-          <span><i class="fas fa-${entry.type === 'Video' ? 'video' : 'phone'} me-2"></i>${entry.type} Call on ${entry.date}</span>
-          <span class="text-sm ${entry.status === 'Ended' ? 'text-danger' : 'text-success'}">${entry.status}</span>
-        `;
-        callHistoryList.appendChild(li);
-      });
-      AOS.refresh();
-    }
-  </script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

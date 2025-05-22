@@ -1,166 +1,1162 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Audio Call with Admin</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>FastDrop - Encrypted Chat</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome for Icons -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <style>
+    :root {
+      --neon-blue: #00f0ff;
+      --neon-purple: #d81b60;
+      --dark-bg: #0a0a1e;
+      --card-bg: rgba(30, 30, 30, 0.7);
+      --glass-bg: rgba(255, 255, 255, 0.05);
+      --glow: 0 0 15px rgba(0, 240, 255, 0.5);
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
     body {
-      background: #0b1e2d;
-      color: white;
+      background: linear-gradient(135deg, var(--dark-bg), #1c2526);
+      color: #ffffff;
+      font-family: 'Roboto', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      overflow: hidden;
+      touch-action: manipulation;
+    }
+
+    .chat-container {
+      display: flex;
+      width: 100%;
+      height: 100vh;
+      animation: fadeIn 0.8s ease-out;
+    }
+
+    .sidebar {
+      width: 280px;
+      background: var(--card-bg);
+      backdrop-filter: blur(15px);
+      padding: 20px;
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
       display: flex;
       flex-direction: column;
+      gap: 20px;
+      overflow-y: auto;
+    }
+
+    .main-chat {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 15px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(10px);
+    }
+
+    h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.8rem;
+      text-align: center;
+      background: linear-gradient(45deg, var(--neon-blue), var(--neon-purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: pulseText 2s infinite;
+    }
+
+    h5 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.1rem;
+      color: var(--neon-blue);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card {
+      background: var(--glass-bg);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 15px;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 16px rgba(0, 240, 255, 0.3);
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.2), transparent);
+      transition: 0.5s;
+    }
+
+    .card:hover::before {
+      left: 100%;
+    }
+
+    .btn {
+      border-radius: 8px;
+      font-family: 'Roboto', sans-serif;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+      padding: 10px;
+      font-size: 0.9rem;
+      touch-action: manipulation;
+    }
+
+    .btn-primary {
+      background: linear-gradient(45deg, var(--neon-blue), #4fc3f7);
+      border: none;
+    }
+
+    .btn-success {
+      background: linear-gradient(45deg, #00e676, #4caf50);
+      border: none;
+    }
+
+    .btn-danger {
+      background: linear-gradient(45deg, #ff1744, #d81b60);
+      border: none;
+    }
+
+    .btn-info {
+      background: linear-gradient(45deg, #ff4081, #f50057);
+      border: none;
+    }
+
+    .btn-outline-secondary {
+      border-color: var(--neon-blue);
+      color: var(--neon-blue);
+    }
+
+    .btn:hover {
+      transform: scale(1.05);
+      box-shadow: var(--glow);
+    }
+
+    .btn::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: 0.5s;
+    }
+
+    .btn:hover::after {
+      left: 100%;
+    }
+
+    .form-control {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      border-radius: 8px;
+      padding: 10px;
+      transition: var(--transition);
+      font-size: 0.9rem;
+    }
+
+    .form-control:focus {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--neon-blue);
+      box-shadow: var(--glow);
+      color: #fff;
+    }
+
+    #chatBox {
+      flex: 1;
+      overflow-y: auto;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .chat-msg {
+      padding: 8px 12px;
+      margin: 6px 0;
+      border-radius: 12px;
+      max-width: 80%;
+      font-size: 0.85rem;
+      position: relative;
+      animation: slideIn 0.3s ease-out;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .chat-msg img, .chat-msg video {
+      max-width: 120px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .chat-msg img:hover, .chat-msg video:hover {
+      transform: scale(1.1);
+    }
+
+    .chat-msg .file-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      padding: 8px;
+      color: #fff;
+      text-decoration: none;
+      transition: var(--transition);
+    }
+
+    .chat-msg .file-btn:hover {
+      background: rgba(0, 240, 255, 0.2);
+      transform: translateX(3px);
+    }
+
+    .chat-msg .meta {
+      font-size: 0.7rem;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .chat-msg .download-btn {
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: var(--transition);
+    }
+
+    .chat-msg .download-btn:hover {
+      transform: scale(1.2);
+    }
+
+    .me {
+      background: linear-gradient(45deg, var(--neon-blue), #4fc3f7);
+      margin-left: auto;
+      align-items: flex-end;
+    }
+
+    .you {
+      background: linear-gradient(45deg, #444, #666);
+      align-items: flex-start;
+    }
+
+    #typingIndicator {
+      font-size: 0.8rem;
+      color: var(--neon-blue);
+      display: none;
+      animation: pulse 1.5s infinite;
+    }
+
+    #progressBar {
+      height: 5px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+
+    #bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple));
+      width: 0;
+      transition: width 0.5s ease-in-out;
+      box-shadow: var(--glow);
+    }
+
+    #status {
+      min-height: 20px;
+      text-align: center;
+      font-weight: 500;
+      margin-bottom: 10px;
+      animation: fadeIn 0.5s ease-in;
+      display: flex;
       align-items: center;
       justify-content: center;
-      height: 100vh;
+      gap: 8px;
+      font-size: 0.9rem;
     }
-    .call-box {
-      background: #1f2a3a;
-      padding: 2rem;
-      border-radius: 1rem;
-      box-shadow: 0 0 20px rgba(0,0,0,0.5);
-      text-align: center;
-    }
-    video, audio {
+
+    .spinner {
       display: none;
+    }
+
+    .spinner.active {
+      display: inline-block;
+      animation: spin 1s linear infinite;
+    }
+
+    .modal-content {
+      background: var(--card-bg);
+      backdrop-filter: blur(15px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    .modal-header, .modal-footer {
+      border: none;
+    }
+
+    .btn-close {
+      filter: invert(1);
+    }
+
+    #connectModal .modal-dialog {
+      max-width: 90%;
+      width: 350px;
+    }
+
+    #videoModal .modal-dialog {
+      max-width: 90%;
+      width: 600px;
+    }
+
+    #remoteVideo, #localVideo {
+      width: 100%;
+      border-radius: 8px;
+      background: #000;
+    }
+
+    #localVideo {
+      max-height: 120px;
+    }
+
+    .call-controls {
+      display: flex;
+      gap: 8px;
+    }
+
+    .file-inputs {
+      display: flex;
+      gap: 3px;
+    }
+
+    .input-group-text {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      cursor: pointer;
+    }
+
+    ::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--neon-blue);
+      border-radius: 3px;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes pulseText {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.8; }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.7; }
+      50% { opacity: 1; }
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .chat-container {
+        flex-direction: column;
+      }
+      .sidebar {
+        width: 100%;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 15px;
+      }
+      .main-chat {
+        height: calc(100vh - 180px);
+        padding: 10px;
+      }
+      h1 {
+        font-size: 1.5rem;
+      }
+      h5 {
+        font-size: 1rem;
+      }
+      .btn {
+        font-size: 0.8rem;
+        padding: 8px;
+      }
+      .form-control {
+        font-size: 0.8rem;
+        padding: 8px;
+      }
+      .chat-msg {
+        font-size: 0.8rem;
+        max-width: 85%;
+      }
+      .chat-msg img, .chat-msg video {
+        max-width: 100px;
+      }
+      #remoteVideo, #localVideo {
+        max-height: 150px;
+      }
+      .input-group-text {
+        padding: 8px;
+      }
+      #videoModal .modal-dialog {
+        width: 95%;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .sidebar {
+        padding: 10px;
+      }
+      .main-chat {
+        padding: 8px;
+      }
+      h1 {
+        font-size: 1.3rem;
+      }
+      .btn {
+        font-size: 0.75rem;
+        padding: 6px;
+      }
+      .form-control {
+        font-size: 0.75rem;
+      }
+      .chat-msg {
+        padding: 6px 10px;
+      }
+      .file-inputs {
+        gap: 2px;
+      }
+      .input-group-text {
+        padding: 6px;
+      }
     }
   </style>
 </head>
 <body>
-
-<div class="call-box" id="callBox" style="display:none;">
-  <h3>Calling Admin: Mehedi Al Hasan Sawon</h3>
-  <button class="btn btn-danger mt-3" onclick="endCall()">End Call</button>
-</div>
-
-<div id="loginBox">
-  <h2>Welcome to Audio Call</h2>
-  <button class="btn btn-primary" onclick="login()">Continue with Google</button>
-</div>
-
-<!-- Modal for Name and Phone -->
-<div class="modal fade" id="infoModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog">
-    <form id="infoForm" class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Your Info</h5>
+  <div class="chat-container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <h1><i class="fas fa-comments me-2"></i>FastDrop</h1>
+      <div id="status" class="text-info"><i class="fas fa-info-circle"></i> Ready to connect</div>
+      <div class="card">
+        <h5><i class="fas fa-door-open me-2"></i>Connect</h5>
+        <button class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#connectModal">
+          <i class="fas fa-plug me-2"></i>Connect
+        </button>
+        <button class="btn btn-info w-100 mt-2" onclick="newConnection()" title="New Connection">
+          <i class="fas fa-redo me-2"></i>New Connect
+        </button>
+        <button class="btn btn-danger w-100 mt-2" onclick="leaveRoom()" id="leaveBtn" style="display: none;">
+          <i class="fas fa-sign-out-alt me-2"></i>Leave
+        </button>
       </div>
-      <div class="modal-body">
-        <input type="text" class="form-control mb-2" placeholder="Your Name" id="nameInput" required />
-        <input type="text" class="form-control" placeholder="Phone Number" id="phoneInput" required />
+    </div>
+
+    <!-- Main Chat Area -->
+    <div class="main-chat">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h5><i class="fas fa-comments me-2"></i>Chat</h5>
+        <div class="call-controls">
+          <button class="btn btn-info me-1" onclick="startCall(true)" title="Video Call">
+            <i class="fas fa-video"></i>
+          </button>
+          <button class="btn btn-info" onclick="startCall(false)" title="Audio Call">
+            <i class="fas fa-phone"></i>
+          </button>
+        </div>
       </div>
-      <div class="modal-footer">
-        <button type="submit" class="btn btn-success">Start Call</button>
+      <div id="chatBox"></div>
+      <div id="typingIndicator"><i class="fas fa-keyboard"></i> Peer is typing...</div>
+      <div id="progressBar" style="display: none;"><div id="bar"></div></div>
+      <div class="input-group mt-2">
+        <div class="file-inputs">
+          <input type="file" id="imageInput" class="d-none" accept="image/jpeg,image/png">
+          <span class="input-group-text" onclick="document.getElementById('imageInput').click()" title="Share Image">
+            <i class="fas fa-image"></i>
+          </span>
+          <input type="file" id="mediaInput" class="d-none" accept="video/*,audio/*">
+          <span class="input-group-text" onclick="document.getElementById('mediaInput').click()" title="Share Media">
+            <i class="fas fa-play-circle"></i>
+          </span>
+          <input type="file" id="docInput" class="d-none" accept=".pdf,.doc,.docx">
+          <span class="input-group-text" onclick="document.getElementById('docInput').click()" title="Share Document">
+            <i class="fas fa-file-alt"></i>
+          </span>
+        </div>
+        <input type="text" id="chatInput" class="form-control" placeholder="Type a message..." maxlength="200">
+        <button class="btn btn-info" onclick="sendMessage()" title="Send">
+          <i class="fas fa-paper-plane"></i>
+        </button>
       </div>
-    </form>
+    </div>
   </div>
-</div>
 
-<!-- Audio elements -->
-<audio id="localAudio" autoplay muted></audio>
-<audio id="remoteAudio" autoplay></audio>
+  <!-- Connect Modal -->
+  <div class="modal fade" id="connectModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="fas fa-plug me-2"></i>Connect to Room</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" id="connectModalBody">
+          <div class="input-group mb-3">
+            <span class="input-group-text"><i class="fas fa-key"></i></span>
+            <input type="text" id="roomInput" class="form-control" placeholder="Enter Room ID (e.g., abc123xy)" maxlength="20">
+            <button class="btn btn-outline-secondary" onclick="generateRoomId()" title="Generate Room ID">
+              <i class="fas fa-random"></i>
+            </button>
+          </div>
+          <div class="d-flex gap-2">
+            <button class="btn btn-primary w-50" onclick="createRoom()" id="createBtn">
+              <i class="fas fa-plus-circle me-2"></i>Create
+              <span class="spinner-border spinner-border-sm spinner" id="createSpinner"></span>
+            </button>
+            <button class="btn btn-success w-50" onclick="joinRoom()" id="joinBtn">
+              <i class="fas fa-sign-in-alt me-2"></i>Join
+              <span class="spinner-border spinner-border-sm spinner" id="joinSpinner"></span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyB4CQ3uiTxrvmbbXM01vcB_LjeW7Lk6ogI",
-    authDomain: "adui-3ee05.firebaseapp.com",
-    projectId: "adui-3ee05",
-    storageBucket: "adui-3ee05.appspot.com",
-    messagingSenderId: "766920897994",
-    appId: "1:766920897994:web:0cea7f8c206455749bcb33",
-    databaseURL: "https://adui-3ee05-default-rtdb.firebaseio.com/"
-  };
+  <!-- Video Call Modal -->
+  <div class="modal fade" id="videoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="fas fa-video me-2"></i>Call</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" onclick="endCall()"></button>
+        </div>
+        <div class="modal-body">
+          <video id="remoteVideo" autoplay playsinline></video>
+          <video id="localVideo" autoplay playsinline muted class="mt-2"></video>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-info" onclick="toggleMute('audio')" id="muteAudioBtn">
+            <i class="fas fa-microphone"></i>
+          </button>
+          <button class="btn btn-info" onclick="toggleMute('video')" id="muteVideoBtn" style="display: none;">
+            <i class="fas fa-video"></i>
+          </button>
+          <button class="btn btn-danger" onclick="endCall()">
+            <i class="fas fa-phone-slash me-2"></i>End
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.database();
+  <script>
+    // Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyB4CQ3uiTxrvmbbXM01vcB_LjeW7Lk6ogI",
+      authDomain: "adui-3ee05.firebaseapp.com",
+      databaseURL: "https://adui-3ee05-default-rtdb.firebaseio.com",
+      projectId: "adui-3ee05",
+      storageBucket: "adui-3ee05.firebasestorage.app",
+      messagingSenderId: "766920897994",
+      appId: "1:766920897994:web:0cea7f8c206455749bcb33",
+      measurementId: "G-9HP12YRYVG"
+    };
 
-  let user = null;
-  let localStream;
-  let peerConnection;
-  const servers = { iceServers: [{ urls: "stun:stun.l.google.com:19302" }] };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-  function login() {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider)
-      .then(result => {
-        user = result.user;
-        const userId = user.uid;
-        // Check if user has name/phone stored
-        db.ref('users/' + userId).once('value').then(snapshot => {
-          if (!snapshot.exists()) {
-            new bootstrap.Modal(document.getElementById('infoModal')).show();
-          } else {
-            startCall();
+    let pc = null;
+    let chatChannel = null;
+    let fileChannel = null;
+    let roomId = null;
+    let localStream = null;
+    let remoteStream = null;
+    let fileMeta = null;
+    let receiveBuffer = [];
+    let receivedSize = 0;
+    let isTyping = false;
+    const connectModal = new bootstrap.Modal(document.getElementById('connectModal'));
+    const videoModal = new bootstrap.Modal(document.getElementById('videoModal'));
+    const encryptionKey = 'fastdrop-secret-key'; // Demo; use secure key exchange in production
+
+    // Utility Functions
+    function setStatus(message, type = 'info', icon = 'fa-info-circle') {
+      const statusEl = document.getElementById('status');
+      statusEl.innerHTML = `<i class="fas ${icon}"></i> ${message}`;
+      statusEl.className = `text-${type}`;
+      statusEl.style.animation = 'none';
+      statusEl.offsetHeight;
+      statusEl.style.animation = 'fadeIn 0.5s ease-in';
+      setTimeout(() => { statusEl.innerHTML = '<i class="fas fa-info-circle"></i> Ready to connect'; }, 5000);
+    }
+
+    function toggleSpinner(id, show) {
+      document.getElementById(id).classList.toggle('active', show);
+    }
+
+    function sanitizeInput(input) {
+      return input.replace(/[<>&"]/g, '').trim();
+    }
+
+    function generateRoomId() {
+      const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+      let id = '';
+      for (let i = 0; i < 8; i++) {
+        id += chars[Math.floor(Math.random() * chars.length)];
+      }
+      document.getElementById('roomInput').value = id;
+      localStorage.setItem('roomId', id);
+      setStatus('Room ID generated', 'success', 'fa-check-circle');
+    }
+
+    // Encryption (Demo; use crypto-js in production)
+    function encryptMessage(message) {
+      let encrypted = '';
+      for (let i = 0; i < message.length; i++) {
+        encrypted += String.fromCharCode(message.charCodeAt(i) ^ encryptionKey.charCodeAt(i % encryptionKey.length));
+      }
+      return btoa(encrypted);
+    }
+
+    function decryptMessage(encrypted) {
+      const decoded = atob(encrypted);
+      let decrypted = '';
+      for (let i = 0; i < decoded.length; i++) {
+        decrypted += String.fromCharCode(decoded.charCodeAt(i) ^ encryptionKey.charCodeAt(i % encryptionKey.length));
+      }
+      return decrypted;
+    }
+
+    // WebRTC Setup
+    function createPeer() {
+      const pc = new RTCPeerConnection({
+        iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+      });
+
+      pc.onicecandidate = async e => {
+        if (e.candidate) {
+          await db.ref(`rooms/${roomId}/ice-candidates/${Date.now()}`).set({
+            candidate: JSON.stringify(e.candidate)
+          });
+        }
+      };
+
+      pc.onconnectionstatechange = () => {
+        console.log('Connection state:', pc.connectionState);
+        if (pc.connectionState === 'connected') {
+          setStatus('Connected to peer!', 'success', 'fa-link');
+          document.getElementById('leaveBtn').style.display = 'block';
+          connectModal.hide();
+        } else if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') {
+          setStatus('Connection lost.', 'danger', 'fa-unlink');
+          cleanupRoom();
+        }
+      };
+
+      pc.ontrack = event => {
+        remoteStream = event.streams[0];
+        document.getElementById('remoteVideo').srcObject = remoteStream;
+      };
+
+      db.ref(`rooms/${roomId}/ice-candidates`).on('child_added', async snap => {
+        if (!pc.currentRemoteDescription) return;
+        const candidate = JSON.parse(snap.val().candidate);
+        try {
+          await pc.addIceCandidate(new RTCIceCandidate(candidate));
+        } catch (error) {
+          console.error('Error adding ICE candidate:', error);
+        }
+      });
+
+      return pc;
+    }
+
+    function setupChatChannel() {
+      chatChannel.onopen = () => setStatus('Chat ready.', 'success', 'fa-comments');
+      chatChannel.onmessage = e => {
+        const data = JSON.parse(e.data);
+        if (data.type === 'typing') {
+          document.getElementById('typingIndicator').style.display = 'block';
+          setTimeout(() => document.getElementById('typingIndicator').style.display = 'none', 3000);
+          return;
+        }
+        const div = document.createElement('div');
+        div.className = 'chat-msg you';
+        div.dataset.id = data.id;
+        let content = '';
+        let downloadUrl = '';
+        let downloadName = 'message.txt';
+        if (data.type === 'text') {
+          content = `<i class="fas fa-user"></i> ${decryptMessage(data.content)}`;
+          downloadUrl = URL.createObjectURL(new Blob([decryptMessage(data.content)], { type: 'text/plain' }));
+        } else if (data.type === 'image') {
+          content = `<i class="fas fa-image"></i> <img src="${data.content}" alt="${data.name}" onclick="window.open(this.src)">`;
+          downloadUrl = data.content;
+          downloadName = data.name;
+        } else if (data.type === 'video') {
+          content = `<i class="fas fa-video"></i> <video src="${data.content}" controls></video>`;
+          downloadUrl = data.content;
+          downloadName = data.name;
+        } else if (data.type === 'audio') {
+          content = `<i class="fas fa-music"></i> <audio src="${data.content}" controls></audio>`;
+          downloadUrl = data.content;
+          downloadName = data.name;
+        } else if (data.type === 'document') {
+          content = `<i class="fas fa-file-alt"></i> <a href="${data.content}" download="${data.name}" class="file-btn">${data.name}</a>`;
+          downloadUrl = data.content;
+          downloadName = data.name;
+        }
+        div.innerHTML = `
+          ${content}
+          <div class="meta">${new Date(data.timestamp).toLocaleTimeString()}</div>
+          <div class="d-flex">
+            <a href="${downloadUrl}" download="${downloadName}" class="download-btn" title="Download"><i class="fas fa-download"></i></a>
+          </div>
+        `;
+        document.getElementById('chatBox').appendChild(div);
+        document.getElementById('chatBox').scrollTop = document.getElementById('chatBox').scrollHeight;
+      };
+      chatChannel.onerror = error => {
+        setStatus('Chat error.', 'danger', 'fa-exclamation-circle');
+        console.error('Chat error:', error);
+      };
+    }
+
+    function setupFileChannel() {
+      fileChannel.binaryType = 'arraybuffer';
+      fileChannel.onopen = () => setStatus('File channel ready.', 'success', 'fa-file');
+      fileChannel.onmessage = event => {
+        if (typeof event.data === 'string') {
+          fileMeta = JSON.parse(event.data);
+          receiveBuffer = [];
+          receivedSize = 0;
+          document.getElementById('progressBar').style.display = 'block';
+          setStatus(`Receiving: ${fileMeta.name}`, 'info', fileMeta.type === 'image' ? 'fa-image' : fileMeta.type === 'video' ? 'fa-video' : fileMeta.type === 'audio' ? 'fa-music' : 'fa-file-alt');
+          return;
+        }
+
+        receiveBuffer.push(event.data);
+        receivedSize += event.data.byteLength;
+
+        const percent = Math.min((receivedSize / fileMeta.size) * 100, 100);
+        document.getElementById('bar').style.width = `${percent}%`;
+
+        if (receivedSize >= fileMeta.size) {
+          const blob = new Blob(receiveBuffer);
+          const url = URL.createObjectURL(blob);
+          const div = document.createElement('div');
+          div.className = 'chat-msg you';
+          div.dataset.id = fileMeta.id;
+          let content = '';
+          if (fileMeta.type === 'image') {
+            content = `<i class="fas fa-image"></i> <img src="${url}" alt="${fileMeta.name}" onclick="window.open(this.src)">`;
+          } else if (fileMeta.type === 'video') {
+            content = `<i class="fas fa-video"></i> <video src="${url}" controls></video>`;
+          } else if (fileMeta.type === 'audio') {
+            content = `<i class="fas fa-music"></i> <audio src="${url}" controls></audio>`;
+          } else if (fileMeta.type === 'document') {
+            content = `<i class="fas fa-file-alt"></i> <a href="${url}" download="${fileMeta.name}" class="file-btn">${fileMeta.name}</a>`;
+          }
+          div.innerHTML = `
+            ${content}
+            <div class="meta">${new Date(fileMeta.timestamp).toLocaleTimeString()}</div>
+            <div class="d-flex">
+              <a href="${url}" download="${fileMeta.name}" class="download-btn" title="Download"><i class="fas fa-download"></i></a>
+            </div>
+          `;
+          document.getElementById('chatBox').appendChild(div);
+          document.getElementById('chatBox').scrollTop = document.getElementById('chatBox').scrollHeight;
+          document.getElementById('progressBar').style.display = 'none';
+          setStatus(`Received: ${fileMeta.name}`, 'success', fileMeta.type === 'image' ? 'fa-image' : fileMeta.type === 'video' ? 'fa-video' : fileMeta.type === 'audio' ? 'fa-music' : 'fa-file-alt');
+        }
+      };
+      fileChannel.onerror = error => {
+        setStatus('File transfer error.', 'danger', 'fa-exclamation-circle');
+        console.error('File error:', error);
+      };
+    }
+
+    // Room Management
+    async function createRoom() {
+      roomId = sanitizeInput(document.getElementById('roomInput').value);
+      if (!roomId || roomId.length < 8) {
+        setStatus('Room ID must be 8+ characters.', 'danger', 'fa-exclamation-triangle');
+        return;
+      }
+
+      toggleSpinner('createSpinner', true);
+      try {
+        pc = createPeer();
+        chatChannel = pc.createDataChannel('chat');
+        fileChannel = pc.createDataChannel('file');
+        setupChatChannel();
+        setupFileChannel();
+
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+        await db.ref(`rooms/${roomId}`).set({ offer: JSON.stringify(offer) });
+        localStorage.setItem('roomId', roomId);
+        setStatus(`Room ${roomId} created. Waiting...`, 'success', 'fa-hourglass-start');
+
+        db.ref(`rooms/${roomId}/answer`).on('value', async snap => {
+          if (snap.exists() && !pc.currentRemoteDescription) {
+            const answer = JSON.parse(snap.val());
+            await pc.setRemoteDescription(new RTCSessionDescription(answer));
           }
         });
-      })
-      .catch(console.error);
-  }
-
-  document.getElementById('infoForm').addEventListener('submit', e => {
-    e.preventDefault();
-    const name = document.getElementById('nameInput').value;
-    const phone = document.getElementById('phoneInput').value;
-    db.ref('users/' + user.uid).set({ name, phone }).then(() => {
-      bootstrap.Modal.getInstance(document.getElementById('infoModal')).hide();
-      startCall();
-    });
-  });
-
-  async function startCall() {
-    document.getElementById('loginBox').style.display = 'none';
-    document.getElementById('callBox').style.display = 'block';
-
-    localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    document.getElementById('localAudio').srcObject = localStream;
-
-    peerConnection = new RTCPeerConnection(servers);
-    localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
-
-    peerConnection.ontrack = event => {
-      document.getElementById('remoteAudio').srcObject = event.streams[0];
-    };
-
-    const callRef = db.ref('calls/' + user.uid);
-    peerConnection.onicecandidate = e => {
-      if (e.candidate) {
-        callRef.child('callerCandidates').push(JSON.stringify(e.candidate));
+      } catch (error) {
+        setStatus(`Error creating room: ${error.message}`, 'danger', 'fa-exclamation-circle');
+        console.error(error);
+      } finally {
+        toggleSpinner('createSpinner', false);
       }
-    };
+    }
 
-    const offer = await peerConnection.createOffer();
-    await peerConnection.setLocalDescription(offer);
-    callRef.set({ offer });
+    async function joinRoom() {
+      roomId = sanitizeInput(document.getElementById('roomInput').value);
+      if (!roomId || roomId.length < 8) {
+        setStatus('Room ID must be 8+ characters.', 'danger', 'fa-exclamation-triangle');
+        return;
+      }
 
-    // Listen for answer
-    callRef.on('value', async snapshot => {
-      const data = snapshot.val();
-      if (data?.answer && !peerConnection.currentRemoteDescription) {
-        const answer = new RTCSessionDescription(data.answer);
-        await peerConnection.setRemoteDescription(answer);
+      toggleSpinner('joinSpinner', true);
+      try {
+        const snap = await db.ref(`rooms/${roomId}/offer`).once('value');
+        if (!snap.exists()) {
+          setStatus(`Room ${roomId} not found.`, 'danger', 'fa-exclamation-circle');
+          return;
+        }
+
+        pc = createPeer();
+        const offer = JSON.parse(snap.val());
+        await pc.setRemoteDescription(new RTCSessionDescription(offer));
+
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
+        await db.ref(`rooms/${roomId}/answer`).set(JSON.stringify(answer));
+        localStorage.setItem('roomId', roomId);
+        setStatus(`Joined room ${roomId}.`, 'success', 'fa-check-circle');
+
+        pc.ondatachannel = event => {
+          if (event.channel.label === 'chat') {
+            chatChannel = event.channel;
+            setupChatChannel();
+          } else if (event.channel.label === 'file') {
+            fileChannel = event.channel;
+            setupFileChannel();
+          }
+        };
+      } catch (error) {
+        setStatus(`Error joining room: ${error.message}`, 'danger', 'fa-exclamation-circle');
+        console.error(error);
+      } finally {
+        toggleSpinner('joinSpinner', false);
+      }
+    }
+
+    async function leaveRoom() {
+      document.getElementById('connectModalBody').innerHTML = `
+        <div class="modal-body">
+          <h5><i class="fas fa-exclamation-triangle me-2"></i>Confirm</h5>
+          <p>Leave the room?</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-times me-2"></i>Cancel</button>
+          <button type="button" class="btn btn-danger" onclick="cleanupRoom(); connectModal.hide(); setStatus('Left room.', 'info', 'fa-info-circle');"><i class="fas fa-check me-2"></i>Confirm</button>
+        </div>
+      `;
+      connectModal.show();
+    }
+
+    function newConnection() {
+      cleanupRoom();
+      localStorage.removeItem('roomId');
+      document.getElementById('chatBox').innerHTML = '';
+      document.getElementById('roomInput').value = '';
+      document.getElementById('connectModalBody').innerHTML = `
+        <div class="input-group mb-3">
+          <span class="input-group-text"><i class="fas fa-key"></i></span>
+          <input type="text" id="roomInput" class="form-control" placeholder="Enter Room ID (e.g., abc123xy)" maxlength="20">
+          <button class="btn btn-outline-secondary" onclick="generateRoomId()" title="Generate Room ID">
+            <i class="fas fa-random"></i>
+          </button>
+        </div>
+        <div class="d-flex gap-2">
+          <button class="btn btn-primary w-50" onclick="createRoom()" id="createBtn">
+            <i class="fas fa-plus-circle me-2"></i>Create
+            <span class="spinner-border spinner-border-sm spinner" id="createSpinner"></span>
+          </button>
+          <button class="btn btn-success w-50" onclick="joinRoom()" id="joinBtn">
+            <i class="fas fa-sign-in-alt me-2"></i>Join
+            <span class="spinner-border spinner-border-sm spinner" id="joinSpinner"></span>
+          </button>
+        </div>
+      `;
+      connectModal.show();
+      setStatus('Ready for new connection.', 'info', 'fa-redo');
+    }
+
+    function cleanupRoom() {
+      if (pc) {
+        pc.close();
+        pc = null;
+        chatChannel = null;
+        fileChannel = null;
+      }
+      if (roomId) {
+        db.ref(`rooms/${roomId}`).remove();
+        roomId = null;
+      }
+      document.getElementById('leaveBtn').style.display = 'none';
+      document.getElementById('progressBar').style.display = 'none';
+      endCall();
+    }
+
+    // File and Media Sending
+    function handleFileInput(inputId) {
+      const file = document.getElementById(inputId).files[0];
+      if (!file) {
+        setStatus('Select a file.', 'danger', 'fa-exclamation-triangle');
+        return;
+      }
+      if (!fileChannel || fileChannel.readyState !== 'open') {
+        setStatus('Not connected.', 'danger', 'fa-unlink');
+        return;
+      }
+
+      const chunkSize = 65536;
+      let offset = 0;
+      const isImage = file.type.startsWith('image/');
+      const isVideo = file.type.startsWith('video/');
+      const isAudio = file.type.startsWith('audio/');
+      const isDocument = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'].includes(file.type);
+      const type = isImage ? 'image' : isVideo ? 'video' : isAudio ? 'audio' : isDocument ? 'document' : 'document';
+      const id = Date.now().toString();
+
+      fileChannel.send(JSON.stringify({ type, name: file.name, size: file.size, id, timestamp: Date.now() }));
+      document.getElementById('progressBar').style.display = 'block';
+      setStatus(`Sending: ${file.name}`, 'info', type === 'image' ? 'fa-image' : type === 'video' ? 'fa-video' : type === 'audio' ? 'fa-music' : 'fa-file-alt');
+
+      const reader = new FileReader();
+      reader.onload = e => {
+        fileChannel.send(e.target.result);
+        offset += e.target.result.byteLength;
+
+        const percent = Math.min((offset / file.size) * 100, 100);
+        document.getElementById('bar').style.width = `${percent}%`;
+
+        if (offset < file.size) {
+          sendChunk(offset);
+        } else {
+          document.getElementById('progressBar').style.display = 'none';
+          const div = document.createElement('div');
+          div.className = 'chat-msg me';
+          div.dataset.id = id;
+          const url = URL.createObjectURL(file);
+          let content = '';
+          if (isImage) {
+            content = `<i class="fas fa-image"></i> <img src="${url}" alt="${file.name}" onclick="window.open(this.src)">`;
+          } else if (isVideo) {
+            content = `<i class="fas fa-video"></i> <video src="${url}" controls></video>`;
+          } else if (isAudio) {
+            content = `<i class="fas fa-music"></i> <audio src="${url}" controls></audio>`;
+          } else {
+            content = `<i class="fas fa-file-alt"></i> <a href="${url}" download="${file.name}" class="file-btn">${file.name}</a>`;
+          }
+          div.innerHTML = `
+            ${content}
+            <div class="meta">${new Date().toLocaleTimeString()}</div>
+            <div class="d-flex">
+              <a href="${url}" download="${file.name}" class="download-btn" title="Download"><i class="fas fa-download"></i></a>
+            </div>
+          `;
+          document.getElementById('chatBox').appendChild(div);
+          document.getElementById('chatBox').scrollTop = document.getElementById('chatBox').scrollHeight;
+          setStatus(`Sent: ${file.name}`, 'success', type === 'image' ? 'fa-image' : type === 'video' ? 'fa-video' : type === 'audio' ? 'fa-music' : 'fa-file-alt');
+        }
+      };
+
+      function sendChunk(o) {
+        const slice = file.slice(o, o + chunkSize);
+        reader.readAsArrayBuffer(slice);
+      }
+
+      sendChunk(0);
+    }
+
+    document.getElementById('imageInput').addEventListener('change', () => handleFileInput('imageInput'));
+    document.getElementById('mediaInput').addEventListener('change', () => handleFileInput('mediaInput'));
+    document.getElementById('docInput').addEventListener('change', () => handleFileInput('docInput'));
+
+    // Chat
+    function sendMessage() {
+      const msg = sanitizeInput(document.getElementById('chatInput').value);
+      if (!msg) {
+        setStatus('Enter a message.', 'danger', 'fa-exclamation-triangle');
+        return;
+      }
+      if (!chatChannel || chatChannel.readyState !== 'open') {
+        setStatus('Not connected.', 'danger', 'fa-unlink');
+        return;
+      }
+
+      const id = Date.now().toString();
+      const encryptedMsg = encryptMessage(msg);
+      chatChannel.send(JSON.stringify({ type: 'text', content: encryptedMsg, id, timestamp: Date.now() }));
+      const downloadUrl = URL.createObjectURL(new Blob([msg], { type: 'text/plain' }));
+      const div = document.createElement('div');
+      div.className = 'chat-msg me';
+      div.dataset.id = id;
+      div.innerHTML = `
+        <i class="fas fa-user-circle"></i> ${msg}
+        <div class="meta">${new Date().toLocaleTimeString()}</div>
+        <div class="d-flex">
+          <a href="${downloadUrl}" download="message.txt" class="download-btn" title="Download"><i class="fas fa-download"></i></a>
+        </div>
+      `;
+      document.getElementById('chatBox').appendChild(div);
+      document.getElementById('chatBox').scrollTop = document.getElementById('chatBox').scrollHeight;
+      document.getElementById('chatInput').value = '';
+    }
+
+    // Typing Indicator
+    document.getElementById('chatInput').addEventListener('input', () => {
+      if (!chatChannel || chatChannel.readyState !== 'open') return;
+      if (!isTyping) {
+        isTyping = true;
+        chatChannel.send(JSON.stringify({ type: 'typing' }));
+        setTimeout(() => isTyping = false, 3000);
       }
     });
 
-    // Listen for ICE from admin
-    db.ref('calls/' + user.uid + '/calleeCandidates').on('child_added', snapshot => {
-      const candidate = new RTCIceCandidate(JSON.parse(snapshot.val()));
-      peerConnection.addIceCandidate(candidate);
+    // Audio/Video Call
+    async function startCall(isVideo) {
+      if (!pc || pc.connectionState !== 'connected') {
+        setStatus('Not connected.', 'danger', 'fa-unlink');
+        return;
+      }
+
+      try {
+        const constraints = isVideo ? { video: true, audio: true } : { audio: true };
+        localStream = await navigator.mediaDevices.getUserMedia(constraints);
+        document.getElementById('localVideo').srcObject = localStream;
+        localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+        document.getElementById('muteVideoBtn').style.display = isVideo ? 'inline-block' : 'none';
+        videoModal.show();
+        setStatus(isVideo ? 'Video call started' : 'Audio call started', 'success', isVideo ? 'fa-video' : 'fa-phone');
+      } catch (error) {
+        setStatus(`Call failed: ${error.message}`, 'danger', 'fa-exclamation-circle');
+        console.error(error);
+      }
+    }
+
+    function toggleMute(type) {
+      if (!localStream) return;
+      localStream.getTracks().forEach(track => {
+        if (track.kind === type) {
+          track.enabled = !track.enabled;
+          const btn = document.getElementById(`mute${type.charAt(0).toUpperCase() + type.slice(1)}Btn`);
+          btn.innerHTML = `<i class="fas fa-${type === 'audio' ? (track.enabled ? 'microphone' : 'microphone-slash') : (track.enabled ? 'video' : 'video-slash')}"></i>`;
+        }
+      });
+    }
+
+    function endCall() {
+      if (localStream) {
+        localStream.getTracks().forEach(track => track.stop());
+        localStream = null;
+      }
+      if (remoteStream) {
+        remoteStream.getTracks().forEach(track => track.stop());
+        remoteStream = null;
+      }
+      document.getElementById('localVideo').srcObject = null;
+      document.getElementById('remoteVideo').srcObject = null;
+      videoModal.hide();
+      setStatus('Call ended.', 'info', 'fa-phone-slash');
+    }
+
+    // Initialize
+    document.getElementById('chatInput').addEventListener('keypress', e => {
+      if (e.key === 'Enter') sendMessage();
     });
-  }
 
-  function endCall() {
-    peerConnection?.close();
-    db.ref('calls/' + user.uid).remove();
-    alert('Call ended');
-    window.location.reload();
-  }
-</script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const savedRoomId = localStorage.getItem('roomId');
+      if (savedRoomId) {
+        document.getElementById('roomInput').value = savedRoomId;
+      }
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+      document.querySelectorAll('.card').forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+      });
+
+      const statusEl = document.getElementById('status');
+      statusEl.addEventListener('DOMSubtreeModified', () => {
+        statusEl.style.animation = 'none';
+        statusEl.offsetHeight;
+        statusEl.style.animation = 'fadeIn 0.5s ease-in';
+      });
+
+      connectModal.show();
+    });
+  </script>
 </body>
 </html>
